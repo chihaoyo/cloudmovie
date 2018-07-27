@@ -1,0 +1,135 @@
+<script>
+/*
+var transactionHistory = [
+  { action: 'insert', index: 0, time: '2018-07-21T08:42:32' },
+  { action: 'update', index: 0, field: 'aa', before: undefined, after: 'AA', time: '2018-07-21T08:42:32' },
+  { action: 'insert', index: 0, time: '2018-07-21T08:42:32' },
+  { action: 'update', index: 0, field: 'bb', before: undefined, after: 'cc', time: '2018-07-21T08:42:32' },
+  { action: 'remove', index: 1, before: '{"aa":"AA"}', time: '2018-07-21T08:42:32' }
+]
+*/
+var transactionHistory = []
+var comp = {
+  title: null,
+  timeline: []
+}
+
+const ACTIONS = {
+  INSERT: 'insert',
+  REMOVE: 'remove',
+  UPDATE: 'update'
+}
+
+function leading0(val) {
+  return val >= 0 && val < 10 ? '0' + val : val
+}
+function time() {
+  let time = new Date()
+  return `${time.getFullYear()}-${leading0(time.getMonth() + 1)}-${leading0(time.getDate())}T${leading0(time.getHours())}:${leading0(time.getMinutes())}:${leading0(time.getSeconds())}`
+}
+
+function insert(index, log = true) {
+  comp.timeline.splice(index, 0, {})
+  if(log) {
+    transactionHistory.push({
+      action: ACTIONS.INSERT,
+      index,
+      time: time()
+    })
+  }
+}
+function remove(index, log = true) {
+  let before = JSON.stringify(comp.timeline[index])
+  if(log) {
+    comp.timeline.splice(index, 1)
+    transactionHistory.push({
+      action: ACTIONS.REMOVE,
+      index,
+      before,
+      time: time()
+    })
+  }
+}
+function update(index, field, val, log = true) {
+  let item = comp.timeline[index]
+  let before = JSON.stringify(item[field])
+  if(val === undefined) {
+    delete item[field]
+  } else {
+    item[field] = val
+  }
+  if(log) {
+    transactionHistory.push({
+      action: ACTIONS.UPDATE,
+      index,
+      field,
+      before,
+      after: val,
+      time: time()
+    })
+  }
+}
+
+insert(0)
+update(0, 'aa', 'bb')
+insert(0)
+update(0, 'bb', 'cc')
+remove(1)
+console.log(transactionHistory)
+
+// undo? => TOO DIFFICULT
+// get version @ log entry ID?
+
+// forward(x) === backward(history.length - x)
+
+function forward(entryCount) {
+  console.log('FORWARD', entryCount)
+  for(let i = 0; i < entryCount; i++) {
+    let entry = transactionHistory[i]
+    // console.log('ENTRY', JSON.stringify(entry))
+
+    if(entry.action === ACTIONS.INSERT) {
+      comp.timeline.splice(entry.index, 0, {})
+    } else if(entry.action === ACTIONS.REMOVE) {
+      comp.timeline.splice(entry.index, 1)
+    } else if(entry.action === ACTIONS.UPDATE) {
+      let item = comp.timeline[entry.index]
+      if(entry.after === undefined) {
+        delete item[entry.field]
+      } else {
+        item[entry.field] = entry.after
+      }
+    }
+    console.log('TIMELINE', JSON.stringify(comp.timeline))
+  }
+}
+
+function backward(entryCount) {
+  console.log('BACKWARD', entryCount)
+  for(let i = transactionHistory.length - 1; i > transactionHistory.length - 1 - entryCount; i--) {
+    let entry = transactionHistory[i]
+    // console.log('ENTRY', JSON.stringify(entry))
+
+    if(entry.action === ACTIONS.INSERT) {
+      comp.timeline.splice(entry.index, 1)
+    } else if(entry.action === ACTIONS.REMOVE) {
+      comp.timeline.splice(entry.index, 0, JSON.parse(entry.before))
+    } else if(entry.action === ACTIONS.UPDATE) {
+      let item = comp.timeline[entry.index]
+      if(entry.before === undefined) {
+        delete item[entry.field]
+      } else {
+        item[entry.field] = entry.before
+      }
+    }
+    console.log('TIMELINE', JSON.stringify(comp.timeline))
+  }
+}
+
+// history forward
+/*
+forward(transactionHistory.length)
+backward(5)
+*/
+
+</script>
