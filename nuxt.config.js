@@ -1,7 +1,4 @@
 module.exports = {
-  /*
-  ** Headers of the page
-  */
   head: {
     title: 'the-cloud-movie',
     meta: [
@@ -10,16 +7,13 @@ module.exports = {
       { hid: 'description', name: 'description', content: 'Edit the web. Hit play.' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }
     ]
   },
-  /*
-  ** Customize the progress bar color
-  */
-  loading: { color: '#3B8070' },
-  /*
-  ** Build configuration
-  */
+  loading: {
+    color: '#FF7171',
+    height: '4px'
+  },
   build: {
     /*
     ** Run ESLint on save
@@ -36,4 +30,3 @@ module.exports = {
     }
   }
 }
-
