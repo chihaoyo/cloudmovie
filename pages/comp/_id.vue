@@ -1,25 +1,28 @@
 <template>
 <div class="page comp">
-  <div>
-    <button @click="insert(0)">0</button>
-    <button @click="update(0, 'aa', 'bb')">1</button>
-    <button @click="insert(0)">2</button>
-    <button @click="update(0, 'bb', 'cc')">3</button>
-    <button @click="remove(1)">4</button>
+  <nav>
+    <div class="title">{{ title }}</div>
+  </nav>
+  <div class="control-panel">
+    <div class="controls">
+      <button @click="insert(0)">0</button>
+      <button @click="update(0, 'aa', 'bb')">1</button>
+      <button @click="insert(0)">2</button>
+      <button @click="update(0, 'bb', 'cc')">3</button>
+      <button @click="remove(1)">4</button>
+    </div>
   </div>
   <div class="timeline">
-    <div class="object" v-for="object of timeline" :key="object.id">
-      <div>
-        {{ object.id }}
-      </div>
-      <div>
-        {{ object }}
+    <div class="objects">
+      <div class="object" v-for="object of timeline" :key="object.id">
+        <div>{{ object.id }}</div>
+        <div>{{ object }}</div>
       </div>
     </div>
   </div>
   <div class="history">
-    <div class="record" v-for="(record, index) of history" :key="index">
-      {{ record }}
+    <div class="records">
+      <div class="record" v-for="(record, index) of history" :key="index">{{ record }}</div>
     </div>
   </div>
 </div>
@@ -134,15 +137,25 @@ export default {
 <style lang="scss">
 .page.comp {
   > .timeline {
-    > .object{
-      padding: 1rem;
-      margin: 1rem;
-      background-color: rgba(black, 0.15);
+    > .objects {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 0.5rem;
+      > .object {
+        padding: 1rem;
+        margin: 0.5rem;
+        max-width: 18rem;
+        background-color: rgba(black, 0.15);
+      }
     }
   }
   > .history {
     background-color: rgba(black, 0.15);
-    font-size: 0.75rem;
+    padding: 1rem;
+    > .records {
+      font-size: 0.75rem;
+    }
   }
 }
 </style>
