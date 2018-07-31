@@ -4,20 +4,11 @@
     <div class="title">{{ title }}</div>
   </nav>
   <div class="control-panel">
-    <div class="controls">
-      <button @click="insert(0)">0</button>
-      <button @click="update(0, 'aa', 'bb')">1</button>
-      <button @click="insert(0)">2</button>
-      <button @click="update(0, 'bb', 'cc')">3</button>
-      <button @click="remove(1)">4</button>
-    </div>
+    <clip init-state="editing" :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" />
   </div>
   <div class="timeline">
-    <div class="objects">
-      <div class="object" v-for="object of timeline" :key="object.id">
-        <div>{{ object.id }}</div>
-        <div>{{ object }}</div>
-      </div>
+    <div class="clips">
+      <clip :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" v-for="clip of timeline" :key="clip.id" />
     </div>
   </div>
   <div class="history">
@@ -31,13 +22,22 @@
 <script>
 import * as util from '~/lib/util'
 import * as ACTIONS from '~/lib/actions'
+import Clip from '~/components/Clip'
 
 export default {
   data() {
     return {
       title: null,
       timeline: [],
-      history: []
+      history: [],
+      newClip: {
+        type: null,
+        url: null,
+        start: null,
+        duration: null,
+        bpd: null
+      },
+      globalAdjustment: 0 // add extra time to each clip for slow internet connection
     }
   },
   mounted() {
@@ -130,6 +130,9 @@ export default {
         console.log('TIMELINE', JSON.stringify(this.timeline))
       }
     }
+  },
+  components: {
+    Clip
   }
 }
 </script>
@@ -156,6 +159,18 @@ export default {
     > .records {
       font-size: 0.75rem;
     }
+  }
+}
+button {
+  appearance: none;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: none;
+  box-shadow: 0 2px 8px 0 rgba(black, 0.25);
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
   }
 }
 </style>
