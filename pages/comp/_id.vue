@@ -4,11 +4,11 @@
     <div class="title">{{ title }}</div>
   </nav>
   <div class="control-panel">
-    <clip init-state="editing" :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" />
+    <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
   </div>
   <div class="timeline">
     <div class="clips">
-      <clip :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" v-for="clip of timeline" :key="clip.id" />
+      <clip :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" v-for="clip of timeline" :key="clip.id" @submit="updateClip" />
     </div>
   </div>
   <div class="history">
@@ -40,9 +40,16 @@ export default {
       globalAdjustment: 0 // add extra time to each clip for slow internet connection
     }
   },
-  mounted() {
-  },
   methods: {
+    addClip() {
+      if(this.newClip.url) {
+        // TODO: combine unit operations to add new clip
+        console.log('newClip', this.newClip)
+      }
+    },
+    updateClip() {
+      // TODO: combine unit operations to update clip
+    },
     insert(index, log = true) {
       let id = util.id()
       this.timeline.splice(index, 0, { id })

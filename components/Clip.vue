@@ -27,7 +27,7 @@
     <text-editor v-if="isEditing" :value.sync="bpd" @input="update('bpd', $event)" placeholder="背景播放長度" />
     <span v-else>{{ bpd }}</span>
   </div>
-  <button @click="isEditing = !isEditing">{{ isEditing ? '完成' : '編輯' }}</button>
+  <button @click="submit">{{ isEditing ? (mode === 'new' ? '新增' : '完成') : '編輯' }}</button>
 </div>
 </template>
 
@@ -36,10 +36,10 @@ import * as util from '~/lib/util'
 import TextEditor from '~/components/TextEditor'
 
 export default {
-  props: ['initState', 'type', 'url', 'start', 'duration', 'bpd'],
+  props: ['mode', 'type', 'url', 'start', 'duration', 'bpd'],
   data() {
     return {
-      isEditing: this.initState === 'editing',
+      isEditing: this.mode === 'new',
       end: null
     }
   },
@@ -89,6 +89,12 @@ export default {
     update(key, value) {
       console.log('update:' + key, value)
       this.$emit('update:' + key, value)
+    },
+    submit() {
+      this.$emit('submit')
+      if(this.mode !== 'new') {
+        this.isEditing = !this.isEditing
+      }
     }
   },
   components: {
