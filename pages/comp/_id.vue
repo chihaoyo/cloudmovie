@@ -8,7 +8,7 @@
   </div>
   <div class="timeline">
     <div class="clips">
-      <clip :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" v-for="clip of timeline" :key="clip.id" @submit="updateClip" />
+      <clip :type.sync="clip.type" :url.sync="clip.url" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" v-for="clip of timeline" :key="clip.id" @submit="updateClip" />
     </div>
   </div>
   <div class="history">
@@ -23,6 +23,8 @@
 import * as util from '~/lib/util'
 import * as ACTIONS from '~/lib/actions'
 import Clip from '~/components/Clip'
+
+const clipProperties = [ 'type', 'url', 'start', 'duration', 'bpd' ]
 
 export default {
   data() {
@@ -44,56 +46,75 @@ export default {
     addClip() {
       if(this.newClip.url) {
         // TODO: combine unit operations to add new clip
-        console.log('newClip', this.newClip)
+        let clipID = this.unitOpInsert(0)
+        clipProperties.forEach(prop => {
+          if(this.newClip[prop]) {
+            this.unitOpUpdate(clipID, prop, this.newClip[prop])
+          }
+          this.newClip[prop] = null
+        })
       }
     },
     updateClip() {
       // TODO: combine unit operations to update clip
     },
-    insert(index, log = true) {
+    unitOpInsert(index, log = true) {
       let id = util.id()
       this.timeline.splice(index, 0, { id })
       if(log) {
         this.history.push({
           action: ACTIONS.INSERT,
-          index,
           id,
-          time: util.time()
-        })
-      }
-    },
-    remove(index, log = true) {
-      let before = JSON.stringify(this.timeline[index])
-      this.timeline.splice(index, 1)
-      if(log) {
-        this.history.push({
-          action: ACTIONS.REMOVE,
           index,
-          before,
           time: util.time()
         })
       }
+      return id
     },
-    update(index, field, val, log = true) {
-      let item = this.timeline[index]
-      if(item) {
-        let before = item[field]
-        if(val === undefined) {
-          delete item[field]
-        } else {
-          this.$set(item, field, val)
-        }
+    unitOpRemove(id, log = true) {
+      let index = this.timeline.findIndex(clip => clip.id === id)
+      if(index > -1) {
+        let before = JSON.stringify(this.timeline[index])
+        this.timeline.splice(index, 1)
         if(log) {
           this.history.push({
-            action: ACTIONS.UPDATE,
+            action: ACTIONS.REMOVE,
+            id,
             index,
-            field,
             before,
-            after: val,
             time: util.time()
           })
         }
+        return true
       }
+      return false
+    },
+    unitOpUpdate(id, prop, val, log = true) {
+      let index = this.timeline.findIndex(clip => clip.id === id)
+      if(index > -1) {
+        let item = this.timeline[index]
+        if(item) {
+          let before = item[prop]
+          if(val === undefined) {
+            delete item[prop]
+          } else {
+            this.$set(item, prop, val)
+          }
+          if(log) {
+            this.history.push({
+              action: ACTIONS.UPDATE,
+              id,
+              index,
+              prop,
+              before,
+              after: val,
+              time: util.time()
+            })
+          }
+        }
+        return true
+      }
+      return false
     },
     forward(recordCount) {
       console.log('FORWARD', recordCount)
@@ -108,9 +129,9 @@ export default {
         } else if(record.action === ACTIONS.UPDATE) {
           let item = this.timeline[record.index]
           if(record.after === undefined) {
-            delete item[record.field]
+            delete item[record.prop]
           } else {
-            item[record.field] = record.after
+            item[record.prop] = record.after
           }
         }
         console.log('TIMELINE', JSON.stringify(this.timeline))
@@ -129,9 +150,9 @@ export default {
         } else if(record.action === ACTIONS.UPDATE) {
           let item = this.timeline[record.index]
           if(record.before === undefined) {
-            delete item[record.field]
+            delete item[record.prop]
           } else {
-            item[record.field] = record.before
+            item[record.prop] = record.before
           }
         }
         console.log('TIMELINE', JSON.stringify(this.timeline))
