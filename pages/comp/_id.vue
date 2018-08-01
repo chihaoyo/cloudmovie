@@ -4,11 +4,11 @@
     <div class="title">{{ title }}</div>
   </nav>
   <div class="control-panel">
-    <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
+    <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
   </div>
   <div class="timeline">
     <div class="clips">
-      <clip :type.sync="clip.type" :url.sync="clip.url" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" v-for="clip of timeline" :key="clip.id" @submit="updateClip" />
+      <clip :type.sync="clip.type" :url.sync="clip.url" :name.sync="clip.name" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" v-for="clip of timeline" :key="clip.id" @submit="updateClip" />
     </div>
   </div>
   <div class="history">
@@ -29,6 +29,9 @@ const clipProperties = {
     default: null
   },
   url: {
+    default: null
+  },
+  name: {
     default: null
   },
   start: {
@@ -52,11 +55,15 @@ export default {
       newClip: {
         type: null,
         url: null,
+        name: null,
         start: 0,
         duration: 0,
         bpd: 0
       },
-      globalAdjustment: 0 // add extra time to each clip for slow internet connection
+      global: {
+        defaultDuration: 5,
+        playbackExtension: 0 // add extra time to each clip for slow internet connection
+      }
     }
   },
   methods: {

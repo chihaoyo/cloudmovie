@@ -10,6 +10,10 @@
       <text-editor :value.sync="url" @input="update('url', $event)" placeholder="網址" />
     </div>
     <div class="prop">
+      <label>名稱</label>
+      <text-editor :value.sync="name" @input="update('name', $event)" placeholder="名稱" />
+    </div>
+    <div class="prop">
       <label>播放長度</label>
       <text-editor :value.sync="duration" @input="update('duration', $event)" placeholder="秒數" class="number" />
       <span class="computed">{{ durationTimeString }}</span>
@@ -31,7 +35,7 @@
     </div>
   </div>
   <div class="summary" v-else>
-    <div class="url">{{ url }}</div>
+    <div class="name">{{ name }}</div>
     <div class="playback">{{ durationTimeString }} from {{ startTimeString }}</div>
   </div>
   <div class="actions">
@@ -41,11 +45,12 @@
 </template>
 
 <script>
+import axios from 'axios'
 import * as util from '~/lib/util'
 import TextEditor from '~/components/TextEditor'
 
 export default {
-  props: ['mode', 'type', 'url', 'duration', 'start', 'bpd'],
+  props: ['mode', 'type', 'url', 'name', 'duration', 'start', 'bpd'],
   data() {
     return {
       isEditing: this.mode === 'new',
@@ -56,6 +61,21 @@ export default {
     this.calculateEnd()
   },
   watch: {
+    url() {
+      if(this.url !== '' && this.url !== null && this.url !== undefined) {
+        axios.get(this.url).then(response => {
+          let matches = response.data.match(/<title>(.+)<\/title>/)
+          if(Array.isArray(matches)) {
+            this.$emit('update:name', matches[1])
+          }
+        }).catch(error => {
+          console.log(error)
+        })
+      }
+    },
+    duration() {
+      this.calculateEnd()
+    },
     start() {
       if(this.duration > 0) {
         this.calculateEnd()
@@ -69,9 +89,6 @@ export default {
       } else {
         this.calculateDuration()
       }
-    },
-    duration() {
-      this.calculateEnd()
     }
   },
   computed: {
@@ -159,9 +176,8 @@ export default {
     }
   }
   > .summary {
-    > .url {
+    > .name {
       line-height: 1.25;
-      word-break: break-all;
     }
     > .playback {
       margin: 0.5rem 0;
