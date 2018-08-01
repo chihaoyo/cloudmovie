@@ -35,20 +35,20 @@ export default {
       newClip: {
         type: null,
         url: null,
-        start: null,
-        duration: null,
-        bpd: null
+        start: 0,
+        duration: 0,
+        bpd: 0
       },
       globalAdjustment: 0 // add extra time to each clip for slow internet connection
     }
   },
   methods: {
     addClip() {
-      if(this.newClip.url) {
+      if(this.newClip.url && this.newClip.duration > 0) {
         // TODO: combine unit operations to add new clip
         let clipID = this.unitOpInsert(0)
         clipProperties.forEach(prop => {
-          if(this.newClip[prop]) {
+          if(this.newClip[prop] !== '' && this.newClip[prop] !== null && this.newClip[prop] !== undefined) {
             this.unitOpUpdate(clipID, prop, this.newClip[prop])
           }
           this.newClip[prop] = null
