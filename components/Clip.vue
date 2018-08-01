@@ -1,39 +1,42 @@
 <template>
 <div class="clip">
-  <div>
-    <span>類型</span>
-    <text-editor v-if="isEditing" :value.sync="type" @input="update('type', $event)" placeholder="類型" />
-    <span v-else>{{ type }}</span>
+  <div class="props" v-if="isEditing">
+    <div class="prop">
+      <label>類型</label>
+      <text-editor :value.sync="type" @input="update('type', $event)" placeholder="類型" />
+    </div>
+    <div class="prop">
+      <label>網址</label>
+      <text-editor :value.sync="url" @input="update('url', $event)" placeholder="網址" />
+    </div>
+    <div class="prop">
+      <label>播放長度</label>
+      <text-editor :value.sync="duration" @input="update('duration', $event)" placeholder="秒數" class="number" />
+      <span class="computed">{{ durationTimeString }}</span>
+    </div>
+    <div class="prop">
+      <label>開始於</label>
+      <text-editor :value.sync="start" @input="update('start', $event)" placeholder="秒數" class="number" />
+      <span class="computed">{{ startTimeString }}</span>
+    </div>
+    <div class="prop">
+      <label>結束於</label>
+      <text-editor v-model="end" placeholder="秒數" class="number" />
+      <span class="computed">{{ endTimeString }}</span>
+    </div>
+    <div class="prop">
+      <label>背景播放</label>
+      <text-editor :value.sync="bpd" @input="update('bpd', $event)" placeholder="秒數" class="number" />
+      <span class="computed">{{ bpdTimeString }}</span>
+    </div>
   </div>
-  <div>
-    <span>網址</span>
-    <text-editor v-if="isEditing" :value.sync="url" @input="update('url', $event)" placeholder="網址" />
-    <span v-else>{{ url }}</span>
+  <div class="summary" v-else>
+    <div class="url">{{ url }}</div>
+    <div class="playback">{{ durationTimeString }} from {{ startTimeString }}</div>
   </div>
-  <div>
-    <span>開始時間</span>
-    <text-editor v-if="isEditing" :value.sync="start" @input="update('start', $event)" placeholder="開始時間" />
-    <span v-else>{{ start }}</span>
-    <span>=> {{ startTimeString }}</span>
+  <div class="actions">
+    <button @click="submit">{{ isEditing ? (mode === 'new' ? '新增' : '完成') : '編輯' }}</button>
   </div>
-  <div>
-    <span>長度</span>
-    <text-editor v-if="isEditing" :value.sync="duration" @input="update('duration', $event)" placeholder="長度" />
-    <span v-else>{{ duration }}</span>
-    <span>=> {{ durationTimeString }}</span>
-  </div>
-  <div>
-    <span>結束時間</span>
-    <text-editor v-if="isEditing" v-model="end" placeholder="結束時間" />
-    <span v-else>{{ end }}</span>
-    <span>=> {{ endTimeString }}</span>
-  </div>
-  <div>
-    <span>背景播放長度</span>
-    <text-editor v-if="isEditing" :value.sync="bpd" @input="update('bpd', $event)" placeholder="背景播放長度" />
-    <span v-else>{{ bpd }}</span>
-  </div>
-  <button @click="submit">{{ isEditing ? (mode === 'new' ? '新增' : '完成') : '編輯' }}</button>
 </div>
 </template>
 
@@ -42,7 +45,7 @@ import * as util from '~/lib/util'
 import TextEditor from '~/components/TextEditor'
 
 export default {
-  props: ['mode', 'type', 'url', 'start', 'duration', 'bpd'],
+  props: ['mode', 'type', 'url', 'duration', 'start', 'bpd'],
   data() {
     return {
       isEditing: this.mode === 'new',
@@ -54,10 +57,18 @@ export default {
   },
   watch: {
     start() {
-      this.calculateDuration()
+      if(this.duration > 0) {
+        this.calculateEnd()
+      } else {
+        this.calculateDuration()
+      }
     },
     end() {
-      this.calculateDuration()
+      if(this.duration > 0) {
+        this.calculateStart()
+      } else {
+        this.calculateDuration()
+      }
     },
     duration() {
       this.calculateEnd()
@@ -72,28 +83,41 @@ export default {
     },
     durationTimeString() {
       return util.timeString(this.duration)
+    },
+    bpdTimeString() {
+      return util.timeString(this.bpd)
     }
   },
   methods: {
     calculateDuration() {
       let start = parseInt(this.start)
       let end = parseInt(this.end)
-      console.log('cal dur', this.start, this.end)
       if(!Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
-        console.log(end - start)
         this.$emit('update:duration', end - start)
+      }
+    },
+    calculateStart() {
+      let end = parseInt(this.end)
+      let duration = parseInt(this.duration)
+      if(!Number.isNaN(end) && !Number.isNaN(duration)) {
+        let newStart = end - duration
+        let newDuration = duration
+        if(end < duration) {
+          newStart = 0
+          newDuration = end
+        }
+        this.$emit('update:start', newStart)
+        this.$emit('update:duration', newDuration)
       }
     },
     calculateEnd() {
       let start = parseInt(this.start)
       let duration = parseInt(this.duration)
-      console.log('cal end', start, duration)
       if(!Number.isNaN(start) && !Number.isNaN(duration)) {
         this.end = start + duration
       }
     },
     update(key, value) {
-      console.log('update:' + key, value)
       this.$emit('update:' + key, value)
     },
     submit() {
@@ -111,7 +135,44 @@ export default {
 
 <style lang="scss">
 .clip {
+  position: relative;
   padding: 1rem;
-  background-color: #ccc;
+  background-color: rgba(blue, 0.15);
+  > .props {
+    > .prop {
+      display: flex;
+      align-items: center;
+      line-height: 1;
+      margin: 0.25rem 0;
+      > label {
+        margin-right: 0.5rem;
+        $font-size: 0.875rem;
+        width: 4 * $font-size;
+        font-size: $font-size;
+        white-space: nowrap;
+        color: rgba(black, 0.5);
+      }
+      > .computed {
+        flex-shrink: 0;
+        margin-left: 0.25rem;
+      }
+    }
+  }
+  > .summary {
+    > .url {
+      line-height: 1.25;
+      word-break: break-all;
+    }
+    > .playback {
+      margin: 0.5rem 0;
+      font-size: 0.875rem;
+      color: rgba(black, 0.65);
+    }
+  }
+  > .actions {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+  }
 }
 </style>

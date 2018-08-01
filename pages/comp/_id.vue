@@ -24,7 +24,24 @@ import * as util from '~/lib/util'
 import * as ACTIONS from '~/lib/actions'
 import Clip from '~/components/Clip'
 
-const clipProperties = [ 'type', 'url', 'start', 'duration', 'bpd' ]
+const clipProperties = {
+  type: {
+    default: null
+  },
+  url: {
+    default: null
+  },
+  start: {
+    default: 0
+  },
+  duration: {
+    default: 0
+  },
+  bpd: {
+    default: 0
+  }
+}
+const clipPropertyList = Object.keys(clipProperties)
 
 export default {
   data() {
@@ -47,11 +64,11 @@ export default {
       if(this.newClip.url && this.newClip.duration > 0) {
         // TODO: combine unit operations to add new clip
         let clipID = this.unitOpInsert(0)
-        clipProperties.forEach(prop => {
+        clipPropertyList.forEach(prop => {
           if(this.newClip[prop] !== '' && this.newClip[prop] !== null && this.newClip[prop] !== undefined) {
             this.unitOpUpdate(clipID, prop, this.newClip[prop])
           }
-          this.newClip[prop] = null
+          this.newClip[prop] = clipProperties[prop].default
         })
       }
     },
@@ -166,18 +183,19 @@ export default {
 </script>
 
 <style lang="scss">
+html, body, input {
+  font-family: "SF Pro Text", sans-serif;
+}
 .page.comp {
   > .timeline {
-    > .objects {
+    > .clips {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
       padding: 0.5rem;
-      > .object {
-        padding: 1rem;
+      > .clip {
         margin: 0.5rem;
-        max-width: 18rem;
-        background-color: rgba(black, 0.15);
+        width: 18rem;
       }
     }
   }
@@ -194,6 +212,9 @@ button {
   font-size: 1rem;
   padding: 0.5rem;
   border: none;
+  background-color: rgba(blue, 0.65);
+  color: rgba(white, 0.95);
+  font-weight: bold;
   box-shadow: 0 2px 8px 0 rgba(black, 0.25);
   cursor: pointer;
 

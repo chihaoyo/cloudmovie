@@ -17,19 +17,24 @@ export default {
 
 <style lang="scss">
 .text-editor {
-  margin: 0.25rem 0;
   > input {
     appearance: none;
-    padding: 0.25rem;
+    padding: 0.375rem 0.5rem;
     border: none;
-    border-bottom: 1px solid grey;
-    background: none;
+    background: rgba(blue, 0.10);
     font-size: 1rem;
+    line-height: 1.25;
+    width: 100%;
+    max-width: none;
+    min-width: none;
 
     &:focus {
-      background: rgba(white, 0.25);
+      background: rgba(white, 0.5);
       outline: none;
     }
+  }
+  &.number {
+    max-width: 4rem;
   }
 }
 </style>
