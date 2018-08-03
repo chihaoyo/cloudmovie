@@ -1,5 +1,5 @@
 <template>
-<div class="clip">
+<div class="clip" :id="id">
   <div class="props" v-if="isEditing">
     <div class="prop">
       <label>類型</label>
@@ -36,7 +36,8 @@
   </div>
   <div class="summary" v-else>
     <div class="name">{{ name }}</div>
-    <div class="playback">{{ durationTimeString }} from {{ startTimeString }}</div>
+    <div class="url" v-if="!name">{{ url }}</div>
+    <div class="playback"><span v-if="start > 0">從 {{ startTimeString }} 開始</span><span>播放長度 {{ durationTimeString }}</span></div>
   </div>
   <div class="actions">
     <button @click="submit">{{ isEditing ? (mode === 'new' ? '新增' : '完成') : '編輯' }}</button>
@@ -50,7 +51,7 @@ import * as util from '~/lib/util'
 import TextEditor from '~/components/TextEditor'
 
 export default {
-  props: ['mode', 'type', 'url', 'name', 'duration', 'start', 'bpd'],
+  props: ['mode', 'id', 'type', 'url', 'name', 'duration', 'start', 'bpd'],
   data() {
     return {
       isEditing: this.mode === 'new',
@@ -155,6 +156,7 @@ export default {
   position: relative;
   padding: 1rem;
   background-color: rgba(blue, 0.15);
+  cursor: default;
   > .props {
     > .prop {
       display: flex;
@@ -178,6 +180,9 @@ export default {
   > .summary {
     > .name {
       line-height: 1.25;
+    }
+    > .url {
+      word-break: break-all;
     }
     > .playback {
       margin: 0.5rem 0;

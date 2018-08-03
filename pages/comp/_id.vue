@@ -5,11 +5,16 @@
   </nav>
   <div class="control-panel">
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
-  </div>
-  <div class="timeline">
-    <div class="clips">
-      <clip :type.sync="clip.type" :url.sync="clip.url" :name.sync="clip.name" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" v-for="clip of timeline" :key="clip.id" @submit="updateClip" />
+    <div class="actions">
+      <button @click="generateTestData">Give me some test data.</button>
     </div>
+  </div>
+  <div class="timeline" @click="timelineClickHandler">
+    <template v-for="(clip, index) of timeline">
+      <div class="cursor" v-if="index === insertAt" :key="index"></div>
+      <clip @click.native.stop :id="clip.id" :type.sync="clip.type" :url.sync="clip.url" :name.sync="clip.name" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" :key="clip.id" @submit="updateClip" />
+    </template>
+    <div class="cursor" v-if="insertAt >= timeline.length"></div>
   </div>
   <div class="history">
     <div class="records">
@@ -63,14 +68,66 @@ export default {
       global: {
         defaultDuration: 5,
         playbackExtension: 0 // add extra time to each clip for slow internet connection
-      }
+      },
+      insertAt: 0
     }
   },
   methods: {
+    generateTestData() {
+      [
+        'https://ask.watchout.tw/games/2018-taipei',
+        'http://api.search.g0v.io/',
+        'https://developer.mozilla.org/en-US/docs/Web/API/Document/getElementsByClassName',
+        'https://www.youtube.com/watch?v=5_5zZnuB71w'
+      ].forEach(url => {
+        this.newClip.url = url
+        this.newClip.duration = 4
+        this.addClip()
+      })
+    },
+    timelineClickHandler(e) {
+      let mouseX = e.offsetX
+      let mouseY = e.offsetY
+
+      let clipPositions = []
+      let rows = []
+      let clips = document.getElementsByClassName('timeline')[0].getElementsByClassName('clip')
+      for(let i = 0; i < clips.length; i++) {
+        let clip = clips[i]
+        let left = clip.offsetLeft
+        let top = clip.offsetTop
+        if(!rows.includes(top)) {
+          rows.push(top)
+        }
+        clipPositions.push({ index: i, left, top })
+      }
+      let targetRowIndex = null
+      for(let i = 0; i < rows.length; i++) {
+        let lower = rows[i]
+        let upper = i + 1 < rows.length ? rows[i + 1] : document.documentElement.offsetHeight
+        if(mouseY >= lower && mouseY < upper) {
+          targetRowIndex = i
+          break
+        }
+      }
+      let targetClipPositions = clipPositions.filter(pos => pos.top === rows[targetRowIndex])
+      let targetIndex = null
+      for(let i = 0; i < targetClipPositions.length; i++) {
+        if(mouseX < targetClipPositions[i].left) {
+          targetIndex = targetClipPositions[i].index
+          break
+        }
+      }
+      if(targetIndex === null) {
+        // next row first clip
+        targetIndex = targetClipPositions[targetClipPositions.length - 1].index + 1
+      }
+      this.insertAt = targetIndex
+    },
     addClip() {
       if(this.newClip.url && this.newClip.duration > 0) {
         // TODO: combine unit operations to add new clip
-        let clipID = this.unitOpInsert(0)
+        let clipID = this.unitOpInsert(this.insertAt)
         clipPropertyList.forEach(prop => {
           if(this.newClip[prop] !== '' && this.newClip[prop] !== null && this.newClip[prop] !== undefined) {
             this.unitOpUpdate(clipID, prop, this.newClip[prop])
@@ -194,16 +251,26 @@ html, body, input {
   font-family: "SF Pro Text", sans-serif;
 }
 .page.comp {
+  > .control-panel {
+    > .actions {
+      margin: 0.5rem;
+    }
+  }
   > .timeline {
-    > .clips {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      padding: 0.5rem;
-      > .clip {
-        margin: 0.5rem;
-        width: 18rem;
-      }
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 0.5rem;
+    cursor: pointer;
+    > .clip {
+      margin: 0.5rem;
+      width: 18rem;
+    }
+    > .cursor {
+      height: 2rem;
+      width: 0.5rem;
+      background-color: rgba(blue, 0.65);
     }
   }
   > .history {
