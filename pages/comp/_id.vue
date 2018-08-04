@@ -1,7 +1,8 @@
 <template>
 <div class="page comp">
   <nav>
-    <div class="title">{{ title }}</div>
+    <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="title = $event" /></div>
+    <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="author = $event" /></div>
   </nav>
   <div class="control-panel">
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
@@ -11,10 +12,10 @@
   </div>
   <div class="timeline" @click="timelineClickHandler">
     <template v-for="(clip, index) of timeline">
-      <div class="cursor" v-if="index === insertAt" :key="index"></div>
+      <insert-indicator :author="author" v-if="index === insertAt" :key="index" />
       <clip @click.native.stop :id="clip.id" :type.sync="clip.type" :url.sync="clip.url" :name.sync="clip.name" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" :key="clip.id" @submit="updateClip" />
     </template>
-    <div class="cursor" v-if="insertAt >= timeline.length"></div>
+    <insert-indicator :author="author" v-if="insertAt >= timeline.length" />
   </div>
   <div class="history">
     <div class="records">
@@ -27,7 +28,9 @@
 <script>
 import * as util from '~/lib/util'
 import * as ACTIONS from '~/lib/actions'
+import TextEditor from '~/components/TextEditor'
 import Clip from '~/components/Clip'
+import InsertIndicator from '~/components/InsertIndicator'
 
 const clipProperties = {
   type: {
@@ -55,6 +58,7 @@ export default {
   data() {
     return {
       title: null,
+      author: null,
       timeline: [],
       history: [],
       newClip: {
@@ -241,7 +245,9 @@ export default {
     }
   },
   components: {
-    Clip
+    TextEditor,
+    Clip,
+    InsertIndicator
   }
 }
 </script>
@@ -251,9 +257,21 @@ html, body, input {
   font-family: "SF Pro Text", sans-serif;
 }
 .page.comp {
+  > nav {
+    display: flex;
+    padding: 0.5rem;
+    background-color: rgba(blue, 0.15);
+    > .title {
+      flex-grow: 1;
+      margin: 0.5rem;
+    }
+    > .author {
+      margin: 0.5rem;
+    }
+  }
   > .control-panel {
     > .actions {
-      margin: 0.5rem;
+      margin: 1rem;
     }
   }
   > .timeline {
@@ -261,16 +279,11 @@ html, body, input {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    padding: 0.5rem;
+    padding: 2rem 0.5rem;
     cursor: pointer;
     > .clip {
       margin: 0.5rem;
       width: 18rem;
-    }
-    > .cursor {
-      height: 2rem;
-      width: 0.5rem;
-      background-color: rgba(blue, 0.65);
     }
   }
   > .history {
