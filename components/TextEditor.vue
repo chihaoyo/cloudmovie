@@ -1,6 +1,6 @@
 <template>
 <div class="text-editor">
-  <input type="text" :value="value" ref="inputElement" :placeholder="placeholder" :disabled="disabled" @input="$emit('input', $event.target.value)" @focus="isFocused = true" @blur="isFocused = false" />
+  <input type="text" :value="value" ref="inputElement" :placeholder="placeholder" :disabled="disabled" @input="atInput" @focus="isFocused = true" @blur="isFocused = false" />
 </div>
 </template>
 
@@ -10,6 +10,11 @@ export default {
   data() {
     return {
       isFocused: false
+    }
+  },
+  methods: {
+    atInput(e) {
+      this.$emit('input', e.target.value)
     }
   }
 }

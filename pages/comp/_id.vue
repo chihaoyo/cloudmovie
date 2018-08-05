@@ -1,8 +1,8 @@
 <template>
 <div class="page comp">
   <nav>
-    <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="title = $event" /></div>
-    <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="author = $event" /></div>
+    <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => title = val" /></div>
+    <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => author = val" /></div>
   </nav>
   <div class="control-panel">
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
