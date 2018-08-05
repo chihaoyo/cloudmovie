@@ -3,24 +3,26 @@
   <div class="props" v-if="isEditing">
     <div class="prop">
       <label>類型</label>
-      <text-editor :value.sync="type" @input="update('type', $event)" placeholder="類型" />
+      <select :value.sync="type" @input="e => update('type', e.target.value)">
+        <option v-for="clipType of clipTypes" :key="clipType.value" :value="clipType.value">{{ clipType.label }}</option>
+      </select>
     </div>
     <div class="prop">
       <label>網址</label>
-      <text-editor :value.sync="url" @input="update('url', $event)" placeholder="網址" />
+      <text-editor :value.sync="url" @input="val => update('url', val)" placeholder="網址" />
     </div>
     <div class="prop">
       <label>名稱</label>
-      <text-editor :value.sync="name" @input="update('name', $event)" placeholder="名稱" />
+      <text-editor :value.sync="name" @input="val => update('name', val)" placeholder="名稱" />
     </div>
     <div class="prop">
       <label>播放長度</label>
-      <text-editor :value.sync="duration" @input="update('duration', $event)" placeholder="秒數" class="number" />
+      <text-editor :value.sync="duration" @input="val => update('duration', val)" placeholder="秒數" class="number" />
       <span class="computed">{{ durationTimeString }}</span>
     </div>
     <div class="prop">
       <label>開始於</label>
-      <text-editor :value.sync="start" @input="update('start', $event)" placeholder="秒數" class="number" />
+      <text-editor :value.sync="start" @input="val => update('start', val)" placeholder="秒數" class="number" />
       <span class="computed">{{ startTimeString }}</span>
     </div>
     <div class="prop">
@@ -30,7 +32,7 @@
     </div>
     <div class="prop">
       <label>背景播放</label>
-      <text-editor :value.sync="bpd" @input="update('bpd', $event)" placeholder="秒數" class="number" />
+      <text-editor :value.sync="bpd" @input="val => update('bpd', val)" placeholder="秒數" class="number" />
       <span class="computed">{{ bpdTimeString }}</span>
     </div>
   </div>
@@ -48,12 +50,16 @@
 <script>
 import axios from 'axios'
 import * as util from '~/lib/util'
+import { TYPES as clipTypes } from '~/lib/types'
 import TextEditor from '~/components/TextEditor'
+
+const videoURLSubstrings = [ 'youtube', 'vimeo' ]
 
 export default {
   props: ['mode', 'id', 'type', 'url', 'name', 'duration', 'start', 'bpd'],
   data() {
     return {
+      clipTypes,
       isEditing: this.mode === 'new',
       end: null
     }
@@ -64,10 +70,13 @@ export default {
   watch: {
     url() {
       if(this.url !== '' && this.url !== null && this.url !== undefined) {
+        if(videoURLSubstrings.some(substr => this.url.includes(substr))) {
+          this.update('type', 'video')
+        }
         axios.get(this.url).then(response => {
           let matches = response.data.match(/<title>(.+)<\/title>/)
           if(Array.isArray(matches)) {
-            this.$emit('update:name', matches[1])
+            this.update('name', matches[1])
           }
         }).catch(error => {
           console.log(error)
@@ -111,7 +120,7 @@ export default {
       let start = parseInt(this.start)
       let end = parseInt(this.end)
       if(!Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
-        this.$emit('update:duration', end - start)
+        this.update('duration', end - start)
       }
     },
     calculateStart() {
@@ -124,8 +133,8 @@ export default {
           newStart = 0
           newDuration = end
         }
-        this.$emit('update:start', newStart)
-        this.$emit('update:duration', newDuration)
+        this.update('start', newStart)
+        this.update('duration', newDuration)
       }
     },
     calculateEnd() {
