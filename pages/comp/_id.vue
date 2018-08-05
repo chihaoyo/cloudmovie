@@ -34,7 +34,7 @@ import InsertIndicator from '~/components/InsertIndicator'
 
 const clipProperties = {
   type: {
-    default: null
+    default: 'webpage'
   },
   url: {
     default: null
@@ -56,19 +56,15 @@ const clipPropertyList = Object.keys(clipProperties)
 
 export default {
   data() {
+    let newClip = {}
+    clipPropertyList.forEach(prop => newClip[prop] = clipProperties[prop].default)
+
     return {
       title: null,
       author: null,
       timeline: [],
       history: [],
-      newClip: {
-        type: null,
-        url: null,
-        name: null,
-        start: 0,
-        duration: 0,
-        bpd: 0
-      },
+      newClip,
       global: {
         defaultDuration: 5,
         playbackExtension: 0 // add extra time to each clip for slow internet connection
