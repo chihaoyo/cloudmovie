@@ -21,6 +21,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '~assets/common.scss';
+
 .text-editor {
   > input {
     appearance: none;
@@ -36,6 +38,11 @@ export default {
     &:focus {
       background: rgba(white, 0.5);
       outline: none;
+    }
+  }
+  &.red {
+    > input {
+      background: rgba($red, 0.25);
     }
   }
   &.number {

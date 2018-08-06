@@ -1,8 +1,8 @@
 <template>
 <div class="page comp">
   <nav>
-    <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => title = val" /></div>
-    <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => author = val" /></div>
+    <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => title = val" class="red" /></div>
+    <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => author = val" class="red" /></div>
   </nav>
   <div class="control-panel">
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
@@ -119,8 +119,8 @@ export default {
         }
       }
       if(targetIndex === null) {
-        // next row first clip
-        targetIndex = targetClipPositions[targetClipPositions.length - 1].index + 1
+        // next row first clip OR just 0
+        targetIndex = targetClipPositions.length > 0 ? targetClipPositions[targetClipPositions.length - 1].index + 1 : 0
       }
       this.insertAt = targetIndex
     },
@@ -249,11 +249,13 @@ export default {
 </script>
 
 <style lang="scss">
+@import '~assets/common.scss';
+
 .page.comp {
   > nav {
     display: flex;
     padding: 0.5rem;
-    background-color: rgba(blue, 0.15);
+    background-color: rgba($red, 0.25);
     > .title {
       flex-grow: 1;
       margin: 0.5rem;
