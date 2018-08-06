@@ -21,7 +21,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '~assets/common.scss';
+@import '~assets/variables.scss';
 
 .text-editor {
   > input {

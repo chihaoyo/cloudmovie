@@ -11,6 +11,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '~assets/variables.scss';
+
 .insert-indicator {
   $width: 0.25rem;
   $height: 3rem;

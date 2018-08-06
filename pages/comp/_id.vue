@@ -1,14 +1,17 @@
 <template>
 <div class="page comp">
   <nav>
-    <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => title = val" class="red" /></div>
-    <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => author = val" class="red" /></div>
+    <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
+    <div class="nav-body">
+      <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => update('title', val)" class="red" /></div>
+      <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => update('author', val)" class="red" /></div>
+    </div>
   </nav>
   <div class="control-panel">
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
     <div class="actions">
-      <button @click="play" class="red">Play ▶︎</button>
-      <button @click="generateTestData">Give me some test data.</button>
+      <button @click="play" class="red">播放 ▶︎</button>
+      <button @click="generateTestData">來點測試資料吧</button>
     </div>
   </div>
   <div class="timeline" @click="timelineClickHandler">
@@ -44,13 +47,13 @@ const clipProperties = {
     default: null
   },
   start: {
-    default: 0
+    default: null
   },
   duration: {
-    default: 0
+    default: null
   },
   bpd: {
-    default: 0
+    default: null
   }
 }
 const clipPropertyList = Object.keys(clipProperties)
@@ -77,6 +80,9 @@ export default {
     play() {
       // TODO: schedule window.open()
     },
+    update(key, val) {
+      this[key] = util.validate(val)
+    },
     generateTestData() {
       [
         'https://ask.watchout.tw/games/2018-taipei',
@@ -100,10 +106,11 @@ export default {
         let clip = clips[i]
         let left = clip.offsetLeft
         let top = clip.offsetTop
+        let width = clip.offsetWidth
         if(!rows.includes(top)) {
           rows.push(top)
         }
-        clipPositions.push({ index: i, left, top })
+        clipPositions.push({ index: i, left, top, width })
       }
       let targetRowIndex = null
       for(let i = 0; i < rows.length; i++) {
@@ -117,7 +124,7 @@ export default {
       let targetClipPositions = clipPositions.filter(pos => pos.top === rows[targetRowIndex])
       let targetIndex = null
       for(let i = 0; i < targetClipPositions.length; i++) {
-        if(mouseX < targetClipPositions[i].left) {
+        if(mouseX < targetClipPositions[i].left + targetClipPositions[i].width / 2) {
           targetIndex = targetClipPositions[i].index
           break
         }
@@ -253,19 +260,32 @@ export default {
 </script>
 
 <style lang="scss">
-@import '~assets/common.scss';
+@import '~assets/styles.scss';
 
 .page.comp {
+  $nav-height: 4rem;
   > nav {
     display: flex;
-    padding: 0.5rem;
-    background-color: rgba($red, 0.25);
-    > .title {
-      flex-grow: 1;
-      margin: 0.5rem;
+    background-color: rgba($red, 0.5);
+    height: $nav-height;
+    > .home {
+      flex-grow: 0;
+      display: block;
+      background-color: $red;
+      width: $nav-height;
+      height: $nav-height;
     }
-    > .author {
-      margin: 0.5rem;
+    > .nav-body {
+      flex-grow: 1;
+      display: flex;
+      padding: 0.75rem 0.25rem;
+      > .title {
+        flex-grow: 1;
+        margin: 0.25rem;
+      }
+      > .author {
+        margin: 0.25rem;
+      }
     }
   }
   > .control-panel {

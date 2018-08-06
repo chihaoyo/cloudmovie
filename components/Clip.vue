@@ -82,6 +82,7 @@ export default {
             })
           }).catch(error => {
             console.log(error)
+            this.update('name', null)
           })
         }
       }
@@ -147,8 +148,8 @@ export default {
         this.end = start + duration
       }
     },
-    update(key, value) {
-      this.$emit('update:' + key, value)
+    update(key, val) {
+      this.$emit('update:' + key, util.validate(val))
     },
     submit() {
       this.$emit('submit')
@@ -164,11 +165,14 @@ export default {
 </script>
 
 <style lang="scss">
+@import '~assets/variables.scss';
+
 .clip {
   position: relative;
   padding: 1rem;
   background-color: rgba(blue, 0.15);
   cursor: default;
+
   > .props {
     > .prop {
       display: flex;
@@ -179,6 +183,7 @@ export default {
         margin-right: 0.5rem;
         $font-size: 0.875rem;
         width: 4 * $font-size;
+        flex-shrink: 0;
         font-size: $font-size;
         white-space: nowrap;
         color: rgba(black, 0.5);
@@ -186,6 +191,8 @@ export default {
       > .computed {
         flex-shrink: 0;
         margin-left: 0.25rem;
+        font-size: 0.875rem;
+        color: rgba(black, 0.5);
       }
     }
   }
