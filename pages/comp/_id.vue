@@ -7,6 +7,7 @@
   <div class="control-panel">
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
     <div class="actions">
+      <button @click="play" class="red">Play ▶︎</button>
       <button @click="generateTestData">Give me some test data.</button>
     </div>
   </div>
@@ -73,6 +74,9 @@ export default {
     }
   },
   methods: {
+    play() {
+      // TODO: schedule window.open()
+    },
     generateTestData() {
       [
         'https://ask.watchout.tw/games/2018-taipei',
@@ -267,6 +271,9 @@ export default {
   > .control-panel {
     > .actions {
       margin: 1rem;
+      > button:not(:last-child) {
+        margin-right: 0.5rem;
+      }
     }
   }
   > .timeline {

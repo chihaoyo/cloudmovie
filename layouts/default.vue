@@ -5,6 +5,8 @@
 </template>
 
 <style lang="scss">
+@import '~assets/common.scss';
+
 html, body, input, select {
   font-family: "SF Pro Text", sans-serif;
   font-size: 16px;
@@ -32,6 +34,9 @@ button {
 
   &:focus {
     outline: none;
+  }
+  &.red {
+    background-color: $red;
   }
 }
 .flex-grow {
