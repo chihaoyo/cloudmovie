@@ -186,13 +186,13 @@ export default {
         flex-shrink: 0;
         font-size: $font-size;
         white-space: nowrap;
-        color: rgba(black, 0.5);
+        color: rgba(blue, 0.5);
       }
       > .computed {
         flex-shrink: 0;
         margin-left: 0.25rem;
         font-size: 0.875rem;
-        color: rgba(black, 0.5);
+        color: rgba(blue, 0.5);
       }
     }
   }
@@ -206,7 +206,7 @@ export default {
     > .playback {
       margin: 0.5rem 0;
       font-size: 0.875rem;
-      color: rgba(black, 0.65);
+      color: rgba(blue, 0.5);
     }
   }
   > .actions {

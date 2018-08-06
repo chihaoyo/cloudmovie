@@ -38,12 +38,20 @@ export default {
       background: rgba(white, 0.5);
       outline: none;
     }
+    &::placeholder {
+      color: rgba(blue, 0.25);
+      opacity: 1;
+    }
   }
   &.red {
     > input {
       background: rgba($red, 0.25);
       &:focus {
         background: rgba(white, 0.5);
+      }
+      &::placeholder {
+        color: rgba($red, 0.5);
+        opacity: 1;
       }
     }
   }
