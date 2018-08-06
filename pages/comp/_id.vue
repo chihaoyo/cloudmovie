@@ -11,6 +11,7 @@
     <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
     <div class="actions">
       <button @click="play" class="red">播放 ▶︎</button>
+      <button @click="stop">停止 ■</button>
       <button @click="generateTestData">來點測試資料吧</button>
     </div>
   </div>
@@ -70,15 +71,55 @@ export default {
       history: [],
       newClip,
       global: {
-        defaultDuration: 5,
-        playbackExtension: 0 // add extra time to each clip for slow internet connection
+        defaultDuration: 4,
+        durationExtension: 0 // add extra time to each clip for slow internet connection
       },
-      insertAt: 0
+      insertAt: 0,
+      isPlaying: false,
+      playingAt: -1,
+      playbackHandle: null,
+      loop: false
     }
   },
   methods: {
     play() {
-      // TODO: schedule window.open()
+      this.isPlaying = true
+
+      // advance playingAt counter
+      let playingNext = this.playingAt + 1
+      if(this.loop) {
+        playingNext = (playingNext + this.timeline.length) % this.timeline.length
+      } else if(playingNext >= this.timeline.length) {
+        playingNext = -1
+      }
+      if(playingNext > -1) {
+        this.playingAt = playingNext
+        // open current clip
+        let clipToPlay = this.timeline[this.playingAt]
+        let clipDuration = (clipToPlay.duration + this.global.durationExtension) * 1000
+        let clipTotalDuration = (clipToPlay.duration + (clipToPlay.bpd ? clipToPlay.bpd : 0) + this.global.durationExtension) * 1000
+        let clipWindow = window.open(clipToPlay.url)
+        // schedule to close current clip
+        setTimeout(() => {
+          try {
+            clipWindow.close()
+          } catch(error) {
+            console.error('Cannot close window', clipWindow)
+          }
+        }, clipTotalDuration)
+
+        // schedule to open next clip
+        this.playbackHandle = setTimeout(this.play, clipDuration)
+      } else {
+        this.stop()
+      }
+    },
+    stop() {
+      this.isPlaying = false
+      this.playingAt = -1
+      if(this.playbackHandle) {
+        clearTimeout(this.playbackHandle)
+      }
     },
     update(key, val) {
       this[key] = util.validate(val)
@@ -88,10 +129,10 @@ export default {
         'https://ask.watchout.tw/games/2018-taipei',
         'http://api.search.g0v.io/',
         'https://developer.mozilla.org/en-US/docs/Web/API/Document/getElementsByClassName',
-        'https://www.youtube.com/watch?v=5_5zZnuB71w'
+        'https://www.youtube.com/watch?v=aR_nxs3xm64'
       ].forEach(url => {
         this.newClip.url = url
-        this.newClip.duration = 4
+        this.newClip.duration = this.global.defaultDuration
         this.addClip()
       })
     },
