@@ -34,7 +34,6 @@ export default {
     width: 100%;
     max-width: none;
     min-width: none;
-
     &:focus {
       background: rgba(white, 0.5);
       outline: none;
@@ -43,6 +42,9 @@ export default {
   &.red {
     > input {
       background: rgba($red, 0.25);
+      &:focus {
+        background: rgba(white, 0.5);
+      }
     }
   }
   &.number {
