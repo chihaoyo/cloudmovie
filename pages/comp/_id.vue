@@ -249,9 +249,6 @@ export default {
 </script>
 
 <style lang="scss">
-html, body, input {
-  font-family: "SF Pro Text", sans-serif;
-}
 .page.comp {
   > nav {
     display: flex;
@@ -288,21 +285,6 @@ html, body, input {
     > .records {
       font-size: 0.75rem;
     }
-  }
-}
-button {
-  appearance: none;
-  font-size: 1rem;
-  padding: 0.5rem;
-  border: none;
-  background-color: rgba(blue, 0.65);
-  color: rgba(white, 0.95);
-  font-weight: bold;
-  box-shadow: 0 2px 8px 0 rgba(black, 0.25);
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
   }
 }
 </style>

@@ -9,11 +9,11 @@
     </div>
     <div class="prop">
       <label>網址</label>
-      <text-editor :value.sync="url" @input="val => update('url', val)" placeholder="網址" />
+      <text-editor :value.sync="url" @input="val => update('url', val)" placeholder="網址" class="flex-grow" />
     </div>
     <div class="prop">
       <label>名稱</label>
-      <text-editor :value.sync="name" @input="val => update('name', val)" placeholder="名稱" />
+      <text-editor :value.sync="name" @input="val => update('name', val)" placeholder="名稱" class="flex-grow" />
     </div>
     <div class="prop">
       <label>播放長度</label>
