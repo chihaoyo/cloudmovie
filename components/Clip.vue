@@ -48,7 +48,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import * as util from '~/lib/util'
 import { TYPES as clipTypes } from '~/lib/types'
 import TextEditor from '~/components/TextEditor'
@@ -73,14 +72,18 @@ export default {
         if(videoURLSubstrings.some(substr => this.url.includes(substr))) {
           this.update('type', 'video')
         }
-        axios.get(this.url).then(response => {
-          let matches = response.data.match(/<title>(.+)<\/title>/)
-          if(Array.isArray(matches)) {
-            this.update('name', matches[1])
-          }
-        }).catch(error => {
-          console.log(error)
-        })
+        if(fetch) {
+          fetch(this.url).then(response => {
+            response.text().then(text => {
+              let matches = text.match(/<title.*>(.+)<\/title>/)
+              if(Array.isArray(matches)) {
+                this.update('name', matches[1])
+              }
+            })
+          }).catch(error => {
+            console.log(error)
+          })
+        }
       }
     },
     duration() {
