@@ -58,5 +58,10 @@ export default {
   &.number {
     max-width: 4rem;
   }
+  &.font-weight-bold {
+    > input {
+      font-weight: bold;
+    }
+  }
 }
 </style>

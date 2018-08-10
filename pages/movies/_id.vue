@@ -3,7 +3,7 @@
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
-      <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red" /></div>
+      <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
       <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => update('author', val)" class="red" /></div>
     </div>
   </nav>
@@ -322,18 +322,7 @@ export default {
 @import '~assets/styles.scss';
 
 .page.comp {
-  $nav-height: 4rem;
   > nav {
-    display: flex;
-    background-color: rgba($red, 0.5);
-    height: $nav-height;
-    > .home {
-      flex-grow: 0;
-      display: block;
-      background-color: $red;
-      width: $nav-height;
-      height: $nav-height;
-    }
     > .nav-body {
       flex-grow: 1;
       display: flex;

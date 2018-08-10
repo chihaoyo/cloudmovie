@@ -45,3 +45,15 @@ pre {
   font-family: "SF Mono", monospace;
   font-size: 0.875em;
 }
+nav {
+  display: flex;
+  background-color: rgba($red, 0.5);
+  height: $nav-height;
+  > .home {
+    flex-grow: 0;
+    display: block;
+    background-color: $red;
+    width: $nav-height;
+    height: $nav-height;
+  }
+}

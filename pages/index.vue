@@ -1,8 +1,13 @@
 <template>
 <div class="page index">
-  <h1 class="text-align-center">The cloud movie.</h1>
-  <div class="actions text-align-center">
-    <button class="red" @click="createMovie">建立新的 cloud movie</button>
+  <nav>
+    <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
+  </nav>
+  <div class="primary">
+    <h1 class="text-align-center">The cloud movie.</h1>
+    <div class="actions text-align-center">
+      <button class="red" @click="createMovie">建立新的 cloud movie</button>
+    </div>
   </div>
   <div class="movies">
     <div class="movie" v-for="movie of movies" :key="movie.id">
@@ -70,17 +75,18 @@ export default {
 @import '~assets/styles.scss';
 
 .page.index {
-  padding: 2rem 0;
-  > h1 {
-    font-size: 1.5rem;
-    margin: 1rem;
+  > .primary {
+    padding: 2rem 0;
+    > h1 {
+      font-size: 1.5rem;
+      margin: 1rem;
+    }
   }
   > .movies {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    margin: 0.25rem;
-    padding: 2rem 0;
+    padding: 0.25rem;
     > .movie {
       margin: 0.25rem;
       padding: 1rem;
