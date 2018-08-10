@@ -37,6 +37,7 @@ import * as ACTIONS from '~/lib/actions'
 import TextEditor from '~/components/TextEditor'
 import Clip from '~/components/Clip'
 import InsertIndicator from '~/components/InsertIndicator'
+import knowsFirebase from '~/interfaces/knowsFirebase'
 
 const clipProperties = {
   type: {
@@ -61,6 +62,7 @@ const clipProperties = {
 const clipPropertyList = Object.keys(clipProperties)
 
 export default {
+  mixins: [knowsFirebase],
   data() {
     let newClip = {}
     clipPropertyList.forEach(prop => newClip[prop] = clipProperties[prop].default)
@@ -81,6 +83,9 @@ export default {
       playbackHandle: null,
       loop: false
     }
+  },
+  beforeMount() {
+    this.firebaseInit()
   },
   methods: {
     play() {
