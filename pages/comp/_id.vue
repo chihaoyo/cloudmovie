@@ -22,11 +22,12 @@
     </template>
     <insert-indicator :author="author" v-if="insertAt >= timeline.length" />
   </div>
-  <div class="history">
+  <pre>{{ JSON.stringify(timeline, null, 2) }}</pre>
+  <pre>
     <div class="records">
       <div class="record" v-for="(record, index) of history" :key="index">{{ record }}</div>
     </div>
-  </div>
+  </pre>
 </div>
 </template>
 
@@ -349,12 +350,10 @@ export default {
       width: 18rem;
     }
   }
-  > .history {
+  > pre {
     background-color: rgba(black, 0.15);
     padding: 1rem;
-    > .records {
-      font-size: 0.75rem;
-    }
+    font-size: 0.75rem;
   }
 }
 </style>
