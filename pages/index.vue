@@ -6,11 +6,13 @@
   </div>
   <div class="movies">
     <div class="movie" v-for="movie of movies" :key="movie.id">
-      <div>{{ movie.id }}</div>
-      <div>{{ movie.title ? movie.title : '未命名' }}</div>
-      <nuxt-link :to="{ name: 'movies-id', params: { id: movie.id } }">
-        <button class="red">編輯</button>
-      </nuxt-link>
+      <div class="id">{{ movie.id }}</div>
+      <div class="title">{{ movie.title ? movie.title : '未命名' }}</div>
+      <div class="actions">
+        <nuxt-link :to="{ name: 'movies-id', params: { id: movie.id } }">
+          <button class="red">編輯</button>
+        </nuxt-link>
+      </div>
     </div>
   </div>
 </div>
@@ -76,12 +78,23 @@ export default {
   > .movies {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     margin: 0.25rem;
     padding: 2rem 0;
     > .movie {
       margin: 0.25rem;
       padding: 1rem;
+      max-width: 18rem;
       background-color: rgba($red, 0.5);
+      > .id {
+        font-size: 0.875rem;
+        color: $red;
+      }
+      > .title {
+        margin: 0.25rem 0;
+        font-size: 1.25rem;
+        font-weight: bold;
+      }
     }
   }
 }
