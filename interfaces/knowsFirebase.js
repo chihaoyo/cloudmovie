@@ -13,7 +13,9 @@ export default {
   },
   methods: {
     firebaseInit() {
-      firebase.initializeApp(firebaseInitConfig)
+      if(firebase.apps.length < 1) {
+        firebase.initializeApp(firebaseInitConfig)
+      }
       this.db = firebase.firestore()
 
       const settings = {
@@ -23,6 +25,9 @@ export default {
     },
     firebaseError() {
       console.error('Something is wrong with Firebase')
+    },
+    firebaseSetMovie(movieID, valueObj) {
+      this.db.collection('movies').doc(movieID).set(valueObj, { merge: true })
     }
   }
 }

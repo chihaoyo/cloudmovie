@@ -3,7 +3,7 @@
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
-      <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => update('title', val)" class="red" /></div>
+      <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red" /></div>
       <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => update('author', val)" class="red" /></div>
     </div>
   </nav>
@@ -84,8 +84,20 @@ export default {
       loop: false
     }
   },
-  beforeMount() {
-    this.firebaseInit()
+  computed: {
+    movieID() {
+      return this.$route.params.id
+    }
+  },
+  mounted() {
+    if(!this.db) {
+      this.firebaseError()
+      return
+    }
+    this.db.collection('movies').doc(this.movieID).onSnapshot(snapshot => {
+      let data = snapshot.data()
+      this.title = data.title
+    })
   },
   methods: {
     play() {
