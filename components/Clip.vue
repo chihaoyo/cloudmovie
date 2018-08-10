@@ -3,9 +3,11 @@
   <div class="props" v-if="isEditing">
     <div class="prop">
       <label>類型</label>
-      <select :value.sync="type" @input="e => update('type', e.target.value)">
-        <option v-for="clipType of clipTypes" :key="clipType.value" :value="clipType.value">{{ clipType.label }}</option>
-      </select>
+      <div class="select">
+        <select :value.sync="type" @input="e => update('type', e.target.value)">
+          <option v-for="clipType of clipTypes" :key="clipType.value" :value="clipType.value">{{ clipType.label }}</option>
+        </select>
+      </div>
     </div>
     <div class="prop">
       <label>網址</label>

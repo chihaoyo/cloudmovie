@@ -14,8 +14,47 @@ html, body, input, select {
   box-sizing: border-box;
   margin: 0;
 }
-select {
-  padding: 0.125rem;
+.select {
+  position: relative;
+  > select {
+    appearance: none;
+    padding: 0.25rem 0.5rem;
+    padding-right: 1.5rem;
+    border: none;
+    border-radius: 0;
+    background-color: rgba(blue, 0.25);
+    &:focus {
+      outline: none;
+    }
+  }
+  $gap: 0.125rem;
+  $triangle-size: 0.375rem;
+  &:before {
+    content: '';
+    position: absolute;
+    right: $gap * 2;
+    top: 50%;
+    transform: translateY($gap);
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: $triangle-size solid transparent;
+    border-right: $triangle-size solid transparent;
+    border-top: $triangle-size solid black;
+  }
+  &:after {
+    content: '';
+    position: absolute;
+    right: $gap * 2;
+    bottom: 50%;
+    transform: translateY(-$gap);
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: $triangle-size solid transparent;
+    border-right: $triangle-size solid transparent;
+    border-bottom: $triangle-size solid black;
+  }
 }
 button {
   appearance: none;
