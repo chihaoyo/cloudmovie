@@ -1,5 +1,5 @@
 <template>
-<div class="clip" :id="id">
+<div class="clip" :id="clipID">
   <div class="props" v-if="isEditing">
     <div class="prop">
       <label>類型</label>
@@ -40,33 +40,53 @@
   </div>
   <div class="summary" v-else>
     <div class="name">{{ name }}</div>
-    <div class="url" v-if="!name">{{ url }}</div>
+    <div class="url font-size-small">{{ url }}</div>
     <div class="playback"><span v-if="start > 0">從 {{ startTimeString }} 開始</span><span>播放長度 {{ durationTimeString }}</span></div>
   </div>
   <div class="actions">
-    <button @click="submit">{{ isEditing ? (mode === 'new' ? '新增' : '完成') : '編輯' }}</button>
+    <button @click="submit">{{ isEditing ? (ref ? '完成' : '新增') : '編輯' }}</button>
   </div>
+  <div class="delete" @click="doDelete">{{ confirmDelete ? '確認': '刪除' }}</div>
 </div>
 </template>
 
 <script>
 import * as util from '~/lib/util'
+import * as CLIP from '~/lib/clip'
 import { TYPES as clipTypes } from '~/lib/types'
 import TextEditor from '~/components/TextEditor'
+import knowsFirebase from '~/interfaces/knowsFirebase'
 
 const videoURLSubstrings = [ 'youtube', 'vimeo' ]
 
 export default {
-  props: ['mode', 'id', 'type', 'url', 'name', 'duration', 'start', 'bpd'],
+  mixins: [knowsFirebase],
+  props: ['movieID', 'clipID'],
   data() {
-    return {
+    let dataObj = {}
+    CLIP.propList.forEach(prop => dataObj[prop] = CLIP.props[prop].default)
+
+    return Object.assign(dataObj, {
+      ref: null,
       clipTypes,
-      isEditing: this.mode === 'new',
+      isEditing: !(this.movieID && this.clipID),
+      confirmDelete: false,
       end: null
-    }
+    })
   },
-  created() {
-    this.calculateEnd()
+  mounted() {
+    if(!this.db) {
+      this.firebaseError()
+      return
+    }
+    if(!(this.movieID && this.clipID)) {
+      return
+    }
+    this.ref = this.db.collection('movies').doc(this.movieID).collection('timeline').doc(this.clipID)
+    this.ref.onSnapshot(snapshot => {
+      let data = snapshot.data()
+      CLIP.propList.forEach(prop => this[prop] = data[prop])
+    })
   },
   watch: {
     url() {
@@ -84,7 +104,6 @@ export default {
             })
           }).catch(error => {
             console.log(error)
-            this.update('name', null)
           })
         }
       }
@@ -108,6 +127,9 @@ export default {
     }
   },
   computed: {
+    mode() {
+      return this.ref ? 'edit' : 'new'
+    },
     startTimeString() {
       return util.timeString(this.start)
     },
@@ -151,12 +173,34 @@ export default {
       }
     },
     update(key, val) {
-      this.$emit('update:' + key, util.validate(val))
+      if(this.clipID) {
+        if(!this.ref) {
+          this.firebaseError()
+        } else {
+          this.ref.set({ [key]: val }, { merge: true })
+        }
+      } else {
+        this[key] = val
+      }
     },
     submit() {
-      this.$emit('submit')
-      if(this.mode !== 'new') {
+      if(!this.ref) {
+        if(this.movieID && this.url && this.duration) {
+          let newClip = {}
+          CLIP.propList.forEach(prop => newClip[prop] = this[prop])
+          this.$emit('submit', newClip)
+        }
+      } else {
         this.isEditing = !this.isEditing
+      }
+    },
+    doDelete() {
+      if(this.confirmDelete) {
+        this.ref.delete()
+      }
+      this.confirmDelete = !this.confirmDelete
+      if(this.confirmDelete) {
+        setTimeout(() => { this.confirmDelete = false }, 4000)
       }
     }
   },
@@ -215,6 +259,14 @@ export default {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
+  }
+  > .delete {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
   }
 }
 </style>
