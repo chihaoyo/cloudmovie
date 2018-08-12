@@ -94,7 +94,7 @@ export default {
             }
           }
         } else if(changeType === 'modified') {
-          // Clip will handle this internally
+          Object.assign(this.timeline.find(clip => clip.id === id), data)
         } else if(changeType === 'removed') {
           let index = this.timeline.findIndex(clip => clip.id === id)
           if(index > -1) {

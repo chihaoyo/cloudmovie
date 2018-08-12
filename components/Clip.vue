@@ -46,7 +46,7 @@
   <div class="actions">
     <button @click="submit">{{ isEditing ? (ref ? '完成' : '新增') : '編輯' }}</button>
   </div>
-  <div class="delete" @click="doDelete">{{ confirmDelete ? '確認': '刪除' }}</div>
+  <div class="delete" v-if="ref" @click="doDelete">{{ confirmDelete ? '確認刪除': '刪除' }}</div>
 </div>
 </template>
 
@@ -85,7 +85,7 @@ export default {
     this.ref = this.db.collection('movies').doc(this.movieID).collection('timeline').doc(this.clipID)
     this.ref.onSnapshot(snapshot => {
       let data = snapshot.data()
-      CLIP.propList.forEach(prop => this[prop] = data[prop])
+      CLIP.propList.forEach(prop => this.$set(this, prop, data[prop]))
     })
   },
   watch: {
@@ -127,9 +127,6 @@ export default {
     }
   },
   computed: {
-    mode() {
-      return this.ref ? 'edit' : 'new'
-    },
     startTimeString() {
       return util.timeString(this.start)
     },
@@ -173,6 +170,12 @@ export default {
       }
     },
     update(key, val) {
+      if(CLIP.props[key].type === 'int') {
+        val = parseInt(val)
+      }
+      if(['', null, undefined, NaN].includes(val)) {
+        val = null
+      }
       if(this.clipID) {
         if(!this.ref) {
           this.firebaseError()
