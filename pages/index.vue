@@ -37,13 +37,18 @@ export default {
       this.firebaseError()
       return
     }
-    this.db.collection('movies').onSnapshot(snapshot => {
+    this.db.collection('movies').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
         let changeType = change.type
         let id = change.doc.id
-        let data = change.doc.data()
+        let data = Object.assign({}, change.doc.data(), { id })
         if(changeType === 'added') {
-          this.movies.push(Object.assign({}, data, { id }))
+          let index = this.movies.findIndex(movie => movie.createdAt <= data.createdAt)
+          if(index < 0) {
+            this.movies.push(data)
+          } else {
+            this.movies.splice(index, 0, data)
+          }
         } else if(changeType === 'modified') {
           Object.assign(this.movies.find(movie => movie.id === id), data)
         } else if(changeType === 'removed') {
@@ -63,8 +68,7 @@ export default {
       }
       this.db.collection('movies').add({
         title: null,
-        timeline: [],
-        history: []
+        createdAt: (new Date()).getTime()
       })
     }
   }
