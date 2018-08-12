@@ -4,21 +4,21 @@
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
       <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
-      <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => update('author', val)" class="red" /></div>
+      <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => localUpdate('author', val)" class="red" /></div>
     </div>
   </nav>
   <div class="control-panel">
-    <clip mode="new" :type.sync="newClip.type" :url.sync="newClip.url" :name.sync="newClip.name" :start.sync="newClip.start" :duration.sync="newClip.duration" :bpd.sync="newClip.bpd" @submit="addClip" />
+    <clip :movieID="movieID" @submit="newClip => createClip(newClip)"/>
     <div class="actions">
-      <button @click="play" class="red">播放 ▶︎</button>
-      <button @click="stop">停止 ■</button>
+      <button @click="play" class="red">播放</button>
+      <button @click="stop">停止</button>
       <button @click="generateTestData">來點測試資料吧</button>
     </div>
   </div>
   <div class="timeline" @click="timelineClickHandler">
     <template v-for="(clip, index) of timeline">
-      <insert-indicator :author="author" v-if="index === insertAt" :key="index" />
-      <clip @click.native.stop :id="clip.id" :type.sync="clip.type" :url.sync="clip.url" :name.sync="clip.name" :start.sync="clip.start" :duration.sync="clip.duration" :bpd.sync="clip.bpd" :key="clip.id" @submit="updateClip" />
+      <insert-indicator :author="author" v-if="index === insertAt" :key="'insert-indicator-' + clip.id" />
+      <clip @click.native.stop :movieID="movieID" :clipID="clip.id" :key="clip.id" />
     </template>
     <insert-indicator :author="author" v-if="insertAt >= timeline.length" />
   </div>
@@ -39,40 +39,15 @@ import Clip from '~/components/Clip'
 import InsertIndicator from '~/components/InsertIndicator'
 import knowsFirebase from '~/interfaces/knowsFirebase'
 
-const clipProperties = {
-  type: {
-    default: 'webpage'
-  },
-  url: {
-    default: null
-  },
-  name: {
-    default: null
-  },
-  start: {
-    default: null
-  },
-  duration: {
-    default: null
-  },
-  bpd: {
-    default: null
-  }
-}
-const clipPropertyList = Object.keys(clipProperties)
-
 export default {
   mixins: [knowsFirebase],
   data() {
-    let newClip = {}
-    clipPropertyList.forEach(prop => newClip[prop] = clipProperties[prop].default)
-
     return {
+      ref: null,
       title: null,
-      author: null,
       timeline: [],
       history: [],
-      newClip,
+      author: null,
       global: {
         defaultDuration: 4,
         durationExtension: 0 // add extra time to each clip for slow internet connection
@@ -94,9 +69,40 @@ export default {
       this.firebaseError()
       return
     }
-    this.db.collection('movies').doc(this.movieID).onSnapshot(snapshot => {
+    if(!this.movieID) {
+      return
+    }
+    this.ref = this.db.collection('movies').doc(this.movieID)
+    this.ref.onSnapshot(snapshot => {
       let data = snapshot.data()
       this.title = data.title
+    })
+    this.ref.collection('timeline').orderBy('index').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        let changeType = change.type
+        let id = change.doc.id
+        let data = Object.assign({}, change.doc.data(), { id })
+        if(changeType === 'added') {
+          if(this.timeline.length < 1) {
+            this.timeline.push(data)
+          } else {
+            let index = this.timeline.findIndex(clip => clip.index >= data.index)
+            if(index < 0) {
+              this.timeline.push(data)
+            } else {
+              this.timeline.splice(index, 0, data)
+            }
+          }
+        } else if(changeType === 'modified') {
+          // Clip will handle this internally
+        } else if(changeType === 'removed') {
+          let index = this.timeline.findIndex(clip => clip.id === id)
+          if(index > -1) {
+            this.timeline.splice(index, 1)
+          }
+          this.shiftClips(index, -1)
+        }
+      })
     })
   },
   methods: {
@@ -139,19 +145,43 @@ export default {
         clearTimeout(this.playbackHandle)
       }
     },
-    update(key, val) {
+    localUpdate(key, val) {
       this[key] = util.validate(val)
     },
+    shiftClips(fromIndex, offset) {
+      return this.db.collection('movies').doc(this.movieID).collection('timeline').where('index', '>=', fromIndex).get().then(snapshot => {
+        let batch = this.db.batch()
+        snapshot.forEach(doc => {
+          batch.update(doc.ref, { index: doc.data().index + offset })
+        })
+        return batch.commit()
+      })
+    },
+    createClip(newClip) {
+      let index = this.insertAt
+      // shift all clips after insersion point
+      this.shiftClips(index, 1).then(() => {
+        newClip.index = index
+        this.db.collection('movies').doc(this.movieID).collection('timeline').add(newClip)
+      })
+    },
     generateTestData() {
+      if(!this.db) {
+        this.firebaseError()
+        return
+      }
       [
         'https://ask.watchout.tw/games/2018-taipei',
-        'http://api.search.g0v.io/',
-        'https://developer.mozilla.org/en-US/docs/Web/API/Document/getElementsByClassName',
-        'https://www.youtube.com/watch?v=aR_nxs3xm64'
-      ].forEach(url => {
-        this.newClip.url = url
-        this.newClip.duration = this.global.defaultDuration
-        this.addClip()
+        'https://vuejs.org/v2/guide/list.html',
+        'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort',
+        'https://www.flickr.com/photos/comickerblue/'
+      ].forEach((url, index) => {
+        setTimeout(() => {
+          let newClip = {}
+          newClip.url = url
+          newClip.duration = this.global.defaultDuration
+          this.createClip(newClip)
+        }, index * 1000)
       })
     },
     timelineClickHandler(e) {
@@ -193,21 +223,6 @@ export default {
         targetIndex = targetClipPositions.length > 0 ? targetClipPositions[targetClipPositions.length - 1].index + 1 : 0
       }
       this.insertAt = targetIndex
-    },
-    addClip() {
-      if(this.newClip.url && this.newClip.duration > 0) {
-        // TODO: combine unit operations to add new clip
-        let clipID = this.unitOpInsert(this.insertAt)
-        clipPropertyList.forEach(prop => {
-          if(this.newClip[prop] !== '' && this.newClip[prop] !== null && this.newClip[prop] !== undefined) {
-            this.unitOpUpdate(clipID, prop, this.newClip[prop])
-          }
-          this.newClip[prop] = clipProperties[prop].default
-        })
-      }
-    },
-    updateClip() {
-      // TODO: combine unit operations to update clip
     },
     unitOpInsert(index, log = true) {
       let id = util.id()
