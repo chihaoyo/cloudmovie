@@ -4,9 +4,10 @@
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
   </nav>
   <div class="primary">
-    <h1 class="text-align-center">The cloud movie.</h1>
+    <h1 class="text-align-center">cloudmovie</h1>
+    <h2 class="text-align-center">Edit the web. Make a movie.</h2>
     <div class="actions text-align-center">
-      <button class="red" @click="createMovie">建立新的 cloud movie</button>
+      <button class="red" @click="createMovie">建立新的 cloudmovie</button>
     </div>
   </div>
   <div class="movies">
@@ -84,6 +85,11 @@ export default {
     > h1 {
       font-size: 1.5rem;
       margin: 1rem;
+    }
+    > h2 {
+      font-size: 1.125rem;
+      margin: 1rem;
+      font-weight: normal;
     }
   }
   > .movies {
