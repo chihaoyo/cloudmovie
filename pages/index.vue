@@ -5,7 +5,7 @@
   </nav>
   <div class="primary">
     <h1 class="text-align-center">cloudmovie</h1>
-    <h2 class="text-align-center">Edit the web. Make a movie.</h2>
+    <h2 class="text-align-center">Edit the web. Hit play.</h2>
     <div class="actions text-align-center">
       <button class="red" @click="createMovie">建立新的 cloudmovie</button>
     </div>
