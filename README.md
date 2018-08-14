@@ -4,9 +4,11 @@
 
 ## Build Setup
 
+This is built with [nuxt.js](https://github.com/nuxt/nuxt.js).
+
 ``` bash
 # install dependencies
-$ npm install # Or yarn install
+$ npm i
 
 # serve with hot reload at localhost:3000
 $ npm run dev
@@ -15,9 +17,7 @@ $ npm run dev
 $ npm run build
 $ npm start
 
-# generate static project
-$ npm run generate
+# run with pm2
+$ npm run build
+$ pm2 start npm --name cloudmovie -- start
 ```
-
-For detailed explanation on how things work, checkout the [Nuxt.js docs](https://github.com/nuxt/nuxt.js).
-
