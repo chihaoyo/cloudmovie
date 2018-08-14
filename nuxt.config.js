@@ -1,6 +1,6 @@
 module.exports = {
   head: {
-    title: 'The cloud movie',
+    title: 'cloudmovie',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
