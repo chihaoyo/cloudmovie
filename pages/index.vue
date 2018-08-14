@@ -87,7 +87,7 @@ export default {
       margin: 1rem;
     }
     > h2 {
-      font-size: 1.125rem;
+      font-size: 0.875rem;
       margin: 1rem;
       font-weight: normal;
     }
