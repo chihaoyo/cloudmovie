@@ -4,7 +4,7 @@
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
       <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
-      <div class="my-title"><text-editor :value.sync="myTitle" placeholder="我的顯示名稱" @input="val => updateMyTitle(val)" class="red" /></div>
+      <div class="my-title"><text-editor :value.sync="myTitle" placeholder="我的顯示名稱" @input="val => localUpdate('myTitle', val)" class="red" /></div>
     </div>
   </nav>
   <div class="control-panel">
@@ -65,6 +65,18 @@ export default {
       return this.$route.params.id
     }
   },
+  watch: {
+    myTitle() {
+      if(this.myID) {
+        this.ref.collection('onlineCollaborators').doc(this.myID).update({ title: this.myTitle })
+      }
+    },
+    insertAt() {
+      if(this.myID) {
+        this.ref.collection('onlineCollaborators').doc(this.myID).update({ insertAt: this.insertAt })
+      }
+    }
+  },
   mounted() {
     if(!this.db) {
       this.firebaseError()
@@ -106,7 +118,8 @@ export default {
       })
     })
     this.ref.collection('onlineCollaborators').add({
-      title: this.myTitle
+      title: this.myTitle,
+      insertAt: this.insertAt
     }).then(docRef => {
       this.myID = docRef.id
     })
@@ -155,11 +168,7 @@ export default {
       }
     },
     localUpdate(key, val) {
-      this[key] = util.validate(val)
-    },
-    updateMyTitle(val) {
-      this.localUpdate('myTitle', val)
-      this.ref.collection('onlineCollaborators').doc(this.myID).update({ title: val })
+      this.$set(this, key, util.validate(val))
     },
     shiftClips(fromIndex, offset) {
       return this.db.collection('movies').doc(this.movieID).collection('timeline').where('index', '>=', fromIndex).get().then(snapshot => {
