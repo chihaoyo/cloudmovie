@@ -2,9 +2,11 @@
 
 > Edit the web. Hit play.
 
-## Build Setup
+This project is initiated by [Elisa Giardina Papà](http://www.elisagiardinapapa.org/) and [chihao](http://chihao.tw/). It is co-developed by [all these amazing contributors](https://github.com/chihaoyo/cloudmovie/graphs/contributors) 😀
 
-This is built with [nuxt.js](https://github.com/nuxt/nuxt.js).
+## Build setup
+
+This project is built with [nuxt.js](https://github.com/nuxt/nuxt.js). Some useful commands are listed here.
 
 ``` bash
 # install dependencies
