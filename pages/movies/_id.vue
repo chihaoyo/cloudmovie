@@ -4,7 +4,7 @@
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
       <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
-      <div class="author"><text-editor :value.sync="author" placeholder="我的顯示名稱" @input="val => localUpdate('author', val)" class="red" /></div>
+      <div class="my-title"><text-editor :value.sync="myTitle" placeholder="我的顯示名稱" @input="val => updateMyTitle(val)" class="red" /></div>
     </div>
   </nav>
   <div class="control-panel">
@@ -17,10 +17,10 @@
   </div>
   <div class="timeline" @click="timelineClickHandler">
     <template v-for="(clip, index) of timeline">
-      <insert-indicator :author="author" v-if="index === insertAt" :key="'insert-indicator-' + clip.id" />
+      <insert-indicator :author="myTitle" v-if="index === insertAt" :key="'insert-indicator-' + clip.id" />
       <clip @click.native.stop :movieID="movieID" :clipID="clip.id" :key="clip.id" />
     </template>
-    <insert-indicator :author="author" v-if="insertAt >= timeline.length" />
+    <insert-indicator :author="myTitle" v-if="insertAt >= timeline.length" />
   </div>
   <pre>{{ JSON.stringify(timeline, null, 2) }}</pre>
   <pre>
@@ -47,7 +47,8 @@ export default {
       title: null,
       timeline: [],
       history: [],
-      author: null,
+      myID: null,
+      myTitle: null,
       global: {
         defaultDuration: 4,
         durationExtension: 0 // add extra time to each clip for slow internet connection
@@ -104,6 +105,14 @@ export default {
         }
       })
     })
+    this.ref.collection('onlineCollaborators').add({
+      title: this.myTitle
+    }).then(docRef => {
+      this.myID = docRef.id
+    })
+    window.addEventListener('beforeunload', event => {
+      this.ref.collection('onlineCollaborators').doc(this.myID).delete()
+    })
   },
   methods: {
     play() {
@@ -147,6 +156,10 @@ export default {
     },
     localUpdate(key, val) {
       this[key] = util.validate(val)
+    },
+    updateMyTitle(val) {
+      this.localUpdate('myTitle', val)
+      this.ref.collection('onlineCollaborators').doc(this.myID).update({ title: val })
     },
     shiftClips(fromIndex, offset) {
       return this.db.collection('movies').doc(this.movieID).collection('timeline').where('index', '>=', fromIndex).get().then(snapshot => {
@@ -346,7 +359,7 @@ export default {
         flex-grow: 1;
         margin: 0.25rem;
       }
-      > .author {
+      > .my-title {
         margin: 0.25rem;
       }
     }
