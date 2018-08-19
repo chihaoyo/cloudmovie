@@ -101,10 +101,10 @@ export default {
       margin: 0.25rem;
       padding: 1rem;
       max-width: 18rem;
-      background-color: rgba($red, 0.5);
+      background-color: rgba($primary-color, 0.5);
       > .id {
         font-size: 0.875rem;
-        color: $red;
+        color: $primary-color;
       }
       > .title {
         margin: 0.25rem 0;

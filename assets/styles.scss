@@ -22,7 +22,7 @@ html, body, input, select {
     padding-right: 1.5rem;
     border: none;
     border-radius: 0;
-    background-color: rgba(blue, 0.25);
+    background-color: rgba($secondary-color, 0.25);
     &:focus {
       outline: none;
     }
@@ -61,7 +61,7 @@ button {
   font-size: 1rem;
   padding: 0.5rem;
   border: none;
-  background-color: rgba(blue, 0.65);
+  background-color: rgba($secondary-color, 0.65);
   color: rgba(white, 0.95);
   font-weight: bold;
   @include shadow;
@@ -71,7 +71,7 @@ button {
     outline: none;
   }
   &.red {
-    background-color: $red;
+    background-color: $primary-color;
   }
 }
 .flex-grow {
@@ -89,12 +89,12 @@ pre {
 }
 nav {
   display: flex;
-  background-color: rgba($red, 0.5);
+  background-color: rgba($primary-color, 0.5);
   height: $nav-height;
   > .home {
     flex-grow: 0;
     display: block;
-    background-color: $red;
+    background-color: $primary-color;
     width: $nav-height;
     height: $nav-height;
   }

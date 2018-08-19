@@ -28,7 +28,7 @@ export default {
     appearance: none;
     padding: 0.375rem 0.5rem;
     border: none;
-    background: rgba(blue, 0.10);
+    background: rgba($secondary-color, 0.10);
     font-size: 1rem;
     line-height: 1.25;
     width: 100%;
@@ -39,18 +39,18 @@ export default {
       outline: none;
     }
     &::placeholder {
-      color: rgba(blue, 0.25);
+      color: rgba($secondary-color, 0.25);
       opacity: 1;
     }
   }
   &.red {
     > input {
-      background: rgba($red, 0.25);
+      background: rgba($primary-color, 0.25);
       &:focus {
         background: rgba(white, 0.5);
       }
       &::placeholder {
-        color: rgba($red, 0.5);
+        color: rgba($primary-color, 0.5);
         opacity: 1;
       }
     }
