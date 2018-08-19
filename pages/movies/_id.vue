@@ -12,7 +12,6 @@
     <div class="actions">
       <button @click="play" class="red">播放</button>
       <button @click="stop">停止</button>
-      <button @click="generateTestData">來點測試資料吧</button>
     </div>
   </div>
   <div class="timeline" @click="timelineClickHandler">
@@ -210,25 +209,6 @@ export default {
       this.shiftClips(index, 1).then(() => {
         newClip.index = index
         this.db.collection('movies').doc(this.movieID).collection('timeline').add(newClip)
-      })
-    },
-    generateTestData() {
-      if(!this.db) {
-        this.firebaseError()
-        return
-      }
-      [
-        'https://ask.watchout.tw/games/2018-taipei',
-        'https://vuejs.org/v2/guide/list.html',
-        'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort',
-        'https://www.flickr.com/photos/comickerblue/'
-      ].forEach((url, index) => {
-        setTimeout(() => {
-          let newClip = {}
-          newClip.url = url
-          newClip.duration = this.global.defaultDuration
-          this.createClip(newClip)
-        }, index * 1000)
       })
     },
     timelineClickHandler(e) {
