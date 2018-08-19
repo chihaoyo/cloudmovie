@@ -1,12 +1,18 @@
 <template>
 <div class="insert-indicator">
-  <div class="author">{{ author ? author : '匿名者' }}</div>
+  <div class="author" :style="backgroundColor">{{ author ? author : '匿名者' }}</div>
+  <div class="bar" :style="backgroundColor"></div>
 </div>
 </template>
 
 <script>
 export default {
-  props: ['author']
+  props: ['author', 'color'],
+  computed: {
+    backgroundColor() {
+      return { backgroundColor: this.color }
+    }
+  }
 }
 </script>
 
@@ -29,13 +35,11 @@ export default {
     padding: 0.25rem;
     font-size: 0.75rem;
     line-height: 1;
-    color: rgba(white, 0.95);
+    color: rgba(black, 0.95);
     background-color: rgba(blue, 0.65);
     word-break: keep-all;
   }
-
-  &:after {
-    content: '';
+  > .bar {
     position: absolute;
     top: 0;
     left: -$width / 2;

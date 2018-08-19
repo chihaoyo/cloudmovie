@@ -17,10 +17,12 @@
   </div>
   <div class="timeline" @click="timelineClickHandler">
     <template v-for="(clip, index) of timeline">
-      <insert-indicator :author="myTitle" v-if="index === insertAt" :key="'insert-indicator-' + clip.id" />
+      <insert-indicator v-for="profile of onlineCollaborators.filter(profile => profile.insertAt === index)" v-if="profile.id !== myID" :author="profile.title" :color="profile.color" :key="'insert-indicator-' + profile.id" />
+      <insert-indicator :author="myTitle" :color="myColor" v-if="index === insertAt" :key="'insert-indicator-' + clip.id" />
       <clip @click.native.stop :movieID="movieID" :clipID="clip.id" :key="clip.id" />
     </template>
-    <insert-indicator :author="myTitle" v-if="insertAt >= timeline.length" />
+    <insert-indicator v-for="profile of onlineCollaborators.filter(profile => profile.insertAt >= timeline.length)" v-if="profile.id !== myID" :author="profile.title" :color="profile.color" :key="'insert-indicator-' + profile.id" />
+    <insert-indicator :author="myTitle" :color="myColor" v-if="insertAt >= timeline.length" />
   </div>
   <pre>{{ JSON.stringify(timeline, null, 2) }}</pre>
   <pre>
@@ -32,6 +34,7 @@
 </template>
 
 <script>
+import colors from '~/lib/colors'
 import * as util from '~/lib/util'
 import * as ACTIONS from '~/lib/actions'
 import TextEditor from '~/components/TextEditor'
@@ -49,6 +52,7 @@ export default {
       onlineCollaborators: [],
       history: [],
       myID: null,
+      myColor: colors[Math.floor(Math.random() * colors.length)],
       myTitle: null,
       global: {
         defaultDuration: 4,
@@ -118,7 +122,7 @@ export default {
         }
       })
     })
-    this.ref.collection('onlineCollaborators').onSnapshot(snapshot => {
+    this.ref.collection('onlineCollaborators').orderBy('insertAt').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
         let changeType = change.type
         let id = change.doc.id
@@ -126,9 +130,9 @@ export default {
         if(changeType === 'added') {
           this.onlineCollaborators.push(data)
         } else if(changeType === 'modified') {
-          Object.assign(this.onlineCollaborators.find(collaborator => collaborator.id === id), data)
+          Object.assign(this.onlineCollaborators.find(profile => profile.id === id), data)
         } else if(changeType === 'removed') {
-          let index = this.onlineCollaborators.findIndex(collaborator => collaborator.id === id)
+          let index = this.onlineCollaborators.findIndex(profile => profile.id === id)
           if(index > -1) {
             this.onlineCollaborators.splice(index, 1)
           }
@@ -137,6 +141,7 @@ export default {
     })
     this.ref.collection('onlineCollaborators').add({
       title: this.myTitle,
+      color: this.myColor,
       insertAt: this.insertAt
     }).then(docRef => {
       this.myID = docRef.id
