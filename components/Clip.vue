@@ -38,10 +38,12 @@
       <span class="computed">{{ bpdTimeString }}</span>
     </div>
   </div>
-  <div class="summary" v-else>
-    <div class="name">{{ name }}</div>
-    <div class="url font-size-small">{{ url }}</div>
-    <div class="playback"><span v-if="start > 0">從 {{ startTimeString }} 開始</span><span>播放長度 {{ durationTimeString }}</span></div>
+  <div class="preview" v-else>
+    <div class="thumbnail" v-if="thumbnailStyles" :style="thumbnailStyles"></div>
+    <div class="summary">
+      <div class="name" :class="name ? ['font-weight-bold'] : ['font-size-small', 'break-all']"><a :href="url" target="_blank">{{ name ? name : url }}</a></div>
+      <div class="playback"><span v-if="start > 0">從 {{ startTimeString }} 開始</span><span>播放長度 {{ durationTimeString }}</span></div>
+    </div>
   </div>
   <div class="actions">
     <button @click="submit">{{ isEditing ? (ref ? '完成' : '新增') : '編輯' }}</button>
@@ -51,12 +53,14 @@
 </template>
 
 <script>
+import * as regularExpressions from '~/lib/regularExpressions'
 import * as util from '~/lib/util'
 import * as CLIP from '~/lib/clip'
 import { TYPES as clipTypes } from '~/lib/types'
 import TextEditor from '~/components/TextEditor'
 import knowsFirebase from '~/interfaces/knowsFirebase'
 
+const springboard = 'https://chihaoyo.net/scripts/'
 const videoURLSubstrings = [ 'youtube', 'vimeo' ]
 
 export default {
@@ -74,6 +78,37 @@ export default {
       end: null
     })
   },
+  computed: {
+    youtubeID() {
+      let id = null
+      if(this.url) {
+        let match = this.url.match(regularExpressions.youtube)
+        if(match) {
+          id = match[1]
+        }
+      }
+      return id
+    },
+    thumbnailStyles() {
+      let styles = null
+      if(this.youtubeID) {
+        styles = { backgroundImage: `url(http://img.youtube.com/vi/${this.youtubeID}/maxresdefault.jpg)` }
+      }
+      return styles
+    },
+    startTimeString() {
+      return util.timeString(this.start)
+    },
+    endTimeString() {
+      return util.timeString(this.end)
+    },
+    durationTimeString() {
+      return util.timeString(this.duration)
+    },
+    bpdTimeString() {
+      return util.timeString(this.bpd)
+    }
+  },
   mounted() {
     if(!this.db) {
       this.firebaseError()
@@ -90,21 +125,29 @@ export default {
   },
   watch: {
     url() {
-      if(this.url !== '' && this.url !== null && this.url !== undefined) {
+      if(this.url !== '' && this.url !== null && this.url !== undefined && this.name === null) {
         if(videoURLSubstrings.some(substr => this.url.includes(substr))) {
           this.update('type', 'video')
         }
         if(fetch) {
-          fetch(this.url).then(response => {
-            response.text().then(text => {
+          if(regularExpressions.youtube.test(this.url)) {
+            fetch(`${springboard}get-youtube-meta.php?id=${this.youtubeID}`).then(response => {
+              return response.json()
+            }).then(json => {
+              this.update('name', json.title)
+            })
+          } else {
+            fetch(`${springboard}get.php?url=${this.url}`).then(response => {
+              return response.text()
+            }).catch(error => {
+              error = null
+            }).then(text => {
               let matches = text.match(/<title.*>(.+)<\/title>/)
               if(Array.isArray(matches)) {
                 this.update('name', matches[1])
               }
             })
-          }).catch(error => {
-            error = null
-          })
+          }
         }
       }
     },
@@ -124,20 +167,6 @@ export default {
       } else {
         this.calculateDuration()
       }
-    }
-  },
-  computed: {
-    startTimeString() {
-      return util.timeString(this.start)
-    },
-    endTimeString() {
-      return util.timeString(this.end)
-    },
-    durationTimeString() {
-      return util.timeString(this.duration)
-    },
-    bpdTimeString() {
-      return util.timeString(this.bpd)
     }
   },
   methods: {
@@ -218,11 +247,11 @@ export default {
 
 .clip {
   position: relative;
-  padding: 1rem;
   background-color: rgba($secondary-color, 0.15);
   cursor: default;
 
   > .props {
+    padding: 1rem;
     > .prop {
       display: flex;
       align-items: center;
@@ -245,17 +274,26 @@ export default {
       }
     }
   }
-  > .summary {
-    > .name {
-      line-height: 1.25;
+  > .preview {
+    > .thumbnail {
+      background-size: contain;
+      &:after {
+        content: '';
+        display: block;
+        width: 100%;
+        padding-bottom: 56.25%;
+      }
     }
-    > .url {
-      word-break: break-all;
-    }
-    > .playback {
-      margin: 0.5rem 0;
-      font-size: 0.875rem;
-      color: rgba($secondary-color, 0.5);
+    > .summary {
+      padding: 1rem;
+      > .name {
+        line-height: 1.25;
+      }
+      > .playback {
+        margin: 0.5rem 0;
+        font-size: 0.875rem;
+        color: rgba($secondary-color, 0.5);
+      }
     }
   }
   > .actions {
