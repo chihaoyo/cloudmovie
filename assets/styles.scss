@@ -10,6 +10,10 @@ html, body, input, select {
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
 }
+a {
+  text-decoration: none;
+  color: blue;
+}
 *, *:before, *:after {
   box-sizing: border-box;
   margin: 0;
@@ -79,6 +83,9 @@ button {
 }
 .text-align-center {
   text-align: center;
+}
+.font-weight-bold {
+  font-weight: bold;
 }
 .font-size-small {
   font-size: 0.875rem;
