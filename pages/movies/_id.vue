@@ -251,13 +251,18 @@ export default {
       }
       this.insertAt = targetIndex
     },
-    goOffline() {
+    goOffline(event) {
+      let message = 'Leaving?'
       if(this.ref) {
         let doc = this.ref.collection('onlineCollaborators').doc(this.myID)
         if(doc) {
           doc.delete()
         }
       }
+      if(event) {
+        event.returnValue = message
+      }
+      return message
     },
     unitOpInsert(index, log = true) {
       let id = util.id()
