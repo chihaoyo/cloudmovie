@@ -46,6 +46,7 @@ export default {
       ref: null,
       title: null,
       timeline: [],
+      onlineCollaborators: [],
       history: [],
       myID: null,
       myTitle: null,
@@ -117,15 +118,34 @@ export default {
         }
       })
     })
+    this.ref.collection('onlineCollaborators').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        let changeType = change.type
+        let id = change.doc.id
+        let data = Object.assign({}, change.doc.data(), { id })
+        if(changeType === 'added') {
+          this.onlineCollaborators.push(data)
+        } else if(changeType === 'modified') {
+          Object.assign(this.onlineCollaborators.find(collaborator => collaborator.id === id), data)
+        } else if(changeType === 'removed') {
+          let index = this.onlineCollaborators.findIndex(collaborator => collaborator.id === id)
+          if(index > -1) {
+            this.onlineCollaborators.splice(index, 1)
+          }
+        }
+      })
+    })
     this.ref.collection('onlineCollaborators').add({
       title: this.myTitle,
       insertAt: this.insertAt
     }).then(docRef => {
       this.myID = docRef.id
     })
-    window.addEventListener('beforeunload', event => {
-      this.ref.collection('onlineCollaborators').doc(this.myID).delete()
-    })
+    window.addEventListener('beforeunload', this.goOffline)
+    window.addEventListener('unload', this.goOffline)
+  },
+  beforeDestroy() {
+    this.goOffline()
   },
   methods: {
     play() {
@@ -245,6 +265,14 @@ export default {
         targetIndex = targetClipPositions.length > 0 ? targetClipPositions[targetClipPositions.length - 1].index + 1 : 0
       }
       this.insertAt = targetIndex
+    },
+    goOffline() {
+      if(this.ref) {
+        let doc = this.ref.collection('onlineCollaborators').doc(this.myID)
+        if(doc) {
+          doc.delete()
+        }
+      }
     },
     unitOpInsert(index, log = true) {
       let id = util.id()
