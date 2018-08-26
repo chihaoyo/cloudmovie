@@ -10,7 +10,8 @@
   <div class="control-panel">
     <clip :movieID="movieID" @submit="newClip => createClip(newClip)"/>
     <div class="actions">
-      <button @click="play" class="red">播放</button>
+      <button @click="play_loop" class="red">重覆播放</button>
+      <button @click="play_once" class="red">一次播放</button>
       <button @click="stop">停止</button>
     </div>
   </div>
@@ -152,6 +153,14 @@ export default {
     this.goOffline()
   },
   methods: {
+    play_once() {
+      this.loop = false;
+      this.play();
+    },
+    play_loop() {
+      this.loop = true;
+      this.play();
+    },
     play() {
       this.isPlaying = true
 
