@@ -1,8 +1,32 @@
+<i18n>
+{
+  "en":{
+    "movie_type": "Type",
+    "movie_url": "URL",
+    "movie_name": "Name",
+    "movie_duration": "Duration",
+    "movie_second": "Second",
+    "movie_start": "Start At",
+    "movie_end": "End At",
+    "movie_background": "Background"
+  },
+  "tw":{
+    "movie_type": "類型",
+    "movie_url": "網址",
+    "movie_name": "名稱",
+    "movie_duration": "播放長度",
+    "movie_second": "秒數",
+    "movie_start": "開始於",
+    "movie_end": "結束於",
+    "movie_background": "背景播放"
+  }
+}
+</i18n>
 <template>
 <div class="clip" :id="clipID">
   <div class="props" v-if="isEditing">
     <div class="prop">
-      <label>類型</label>
+      <label>{{ $t('movie_type') }}</label>
       <div class="select">
         <select :value.sync="type" @input="e => update('type', e.target.value)">
           <option v-for="clipType of clipTypes" :key="clipType.value" :value="clipType.value">{{ clipType.label }}</option>
@@ -10,31 +34,31 @@
       </div>
     </div>
     <div class="prop">
-      <label>網址</label>
-      <text-editor :value.sync="url" @input="val => update('url', val)" placeholder="網址" class="flex-grow" />
+      <label>{{ $t('movie_url') }}</label>
+      <text-editor :value.sync="url" @input="val => update('url', val)" :placeholder="$t('movie_url')" class="flex-grow" />
     </div>
     <div class="prop">
-      <label>名稱</label>
-      <text-editor :value.sync="name" @input="val => update('name', val)" placeholder="名稱" class="flex-grow" />
+      <label>{{ $t('movie_name') }}</label>
+      <text-editor :value.sync="name" @input="val => update('name', val)" :placeholder="$t('movie_name')" class="flex-grow" />
     </div>
     <div class="prop">
-      <label>播放長度</label>
-      <text-editor :value.sync="duration" @input="val => update('duration', val)" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_duration') }}</label>
+      <text-editor :value.sync="duration" @input="val => update('duration', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ durationTimeString }}</span>
     </div>
     <div class="prop">
-      <label>開始於</label>
-      <text-editor :value.sync="start" @input="val => update('start', val)" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_start') }}</label>
+      <text-editor :value.sync="start" @input="val => update('start', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ startTimeString }}</span>
     </div>
     <div class="prop">
-      <label>結束於</label>
-      <text-editor v-model="end" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_end') }}</label>
+      <text-editor v-model="end" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ endTimeString }}</span>
     </div>
     <div class="prop">
-      <label>背景播放</label>
-      <text-editor :value.sync="bpd" @input="val => update('bpd', val)" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_background') }}</label>
+      <text-editor :value.sync="bpd" @input="val => update('bpd', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ bpdTimeString }}</span>
     </div>
   </div>
