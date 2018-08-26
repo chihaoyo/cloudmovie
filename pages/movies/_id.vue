@@ -1,18 +1,34 @@
+<i18n>
+{
+  "en":{
+    "movie_title": "Movie Title",
+    "play_loop": "Play Loop",
+    "play_once": "Play Once",
+    "stop": "Stop"
+  },
+  "tw":{
+    "movie_title": "文件標題",
+    "play_loop": "重覆播放",
+    "play_once": "一次播放",
+    "stop": "停止"
+  }
+}
+</i18n>
 <template>
 <div class="page comp">
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
-      <div class="title"><text-editor :value.sync="title" placeholder="文件標題" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
+      <div class="title"><text-editor :value.sync="title" :placeholder="$t('movie_title')" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
       <div class="my-title"><text-editor :value.sync="myTitle" placeholder="我的顯示名稱" @input="val => localUpdate('myTitle', val)" class="red" /></div>
     </div>
   </nav>
   <div class="control-panel">
     <clip :movieID="movieID" @submit="newClip => createClips([newClip])"/>
     <div class="actions">
-      <button @click="playLoop" class="red">重覆播放</button>
-      <button @click="playOnce" class="red">一次播放</button>
-      <button @click="stop">停止</button>
+      <button @click="playLoop" class="red">{{ $t('play_loop') }}</button>
+      <button @click="playOnce" class="red">{{ $t('play_once') }}</button>
+      <button @click="stop">{{ $t('stop') }}</button>
     </div>
     <div class="actions">
       <button @click="toggleSelection">{{ isSelecting ? '取消' : '' }}選取</button>

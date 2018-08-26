@@ -1,8 +1,46 @@
+<i18n>
+{
+  "en":{
+    "movie_type": "Type",
+    "movie_url": "URL",
+    "movie_name": "Name",
+    "movie_duration": "Duration",
+    "movie_second": "Second",
+    "movie_start": "Start At",
+    "movie_end": "End At",
+    "movie_background": "Background",
+    "play_start": "Play from {timeString}",
+    "play_duration": "Duration {timeString}",
+    "button_finish": "Finish",
+    "button_add": "Add",
+    "button_edit": "Edit",
+    "button_delete": "Delete",
+    "button_delete_confirmed": "Delete Confirmed"
+  },
+  "tw":{
+    "movie_type": "類型",
+    "movie_url": "網址",
+    "movie_name": "名稱",
+    "movie_duration": "播放長度",
+    "movie_second": "秒數",
+    "movie_start": "開始於",
+    "movie_end": "結束於",
+    "movie_background": "背景播放",
+    "play_start": "從 {timeString} 開始",
+    "play_duration": "播放長度 {timeString}",
+    "button_finish": "完成",
+    "button_add": "新增",
+    "button_edit": "編輯t",
+    "button_delete": "刪除",
+    "button_delete_confirmed": "確認刪除"
+  }
+}
+</i18n>
 <template>
 <div class="clip" :id="clipID">
   <div class="props" v-if="isEditing">
     <div class="prop">
-      <label>類型</label>
+      <label>{{ $t('movie_type') }}</label>
       <div class="select">
         <select :value.sync="type" @input="e => update('type', e.target.value)">
           <option v-for="clipType of clipTypes" :key="clipType.value" :value="clipType.value">{{ clipType.label }}</option>
@@ -10,31 +48,31 @@
       </div>
     </div>
     <div class="prop">
-      <label>網址</label>
-      <text-editor :value.sync="url" @input="val => update('url', val)" placeholder="網址" class="flex-grow" />
+      <label>{{ $t('movie_url') }}</label>
+      <text-editor :value.sync="url" @input="val => update('url', val)" :placeholder="$t('movie_url')" class="flex-grow" />
     </div>
     <div class="prop">
-      <label>名稱</label>
-      <text-editor :value.sync="name" @input="val => update('name', val)" placeholder="名稱" class="flex-grow" />
+      <label>{{ $t('movie_name') }}</label>
+      <text-editor :value.sync="name" @input="val => update('name', val)" :placeholder="$t('movie_name')" class="flex-grow" />
     </div>
     <div class="prop">
-      <label>播放長度</label>
-      <text-editor :value.sync="duration" @input="val => update('duration', val)" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_duration') }}</label>
+      <text-editor :value.sync="duration" @input="val => update('duration', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ durationTimeString }}</span>
     </div>
     <div class="prop">
-      <label>開始於</label>
-      <text-editor :value.sync="start" @input="val => update('start', val)" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_start') }}</label>
+      <text-editor :value.sync="start" @input="val => update('start', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ startTimeString }}</span>
     </div>
     <div class="prop">
-      <label>結束於</label>
-      <text-editor v-model="end" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_end') }}</label>
+      <text-editor v-model="end" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ endTimeString }}</span>
     </div>
     <div class="prop">
-      <label>背景播放</label>
-      <text-editor :value.sync="bpd" @input="val => update('bpd', val)" placeholder="秒數" class="number" />
+      <label>{{ $t('movie_background') }}</label>
+      <text-editor :value.sync="bpd" @input="val => update('bpd', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ bpdTimeString }}</span>
     </div>
   </div>
@@ -42,14 +80,14 @@
     <div class="thumbnail" v-if="thumbnailStyles" :style="thumbnailStyles"></div>
     <div class="summary">
       <div class="name" :class="name ? ['font-weight-bold'] : ['font-size-small', 'break-all']"><a :href="url" target="_blank">{{ name ? name : url }}</a></div>
-      <div class="playback"><span v-if="start > 0">從 {{ startTimeString }} 開始</span><span>播放長度 {{ durationTimeString }}</span></div>
+      <div class="playback"><span v-if="start > 0">{{ $t('play_start', {timeString:  startTimeString}) }}</span><span>{{ $t('play_duration', {timeString: durationTimeString}) }}</span></div>
     </div>
   </div>
   <div class="actions" v-if="!isSelecting">
-    <button @click="submit">{{ isEditing ? (ref ? '完成' : '新增') : '編輯' }}</button>
+    <button @click="submit">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
   </div>
   <input type="checkbox" v-else class="toggle-select" v-model="isSelected" @change="$emit('select', clipID)" />
-  <div class="delete" v-if="ref && !isSelecting" @click="doDelete">{{ confirmDelete ? '確認刪除': '刪除' }}</div>
+  <div class="delete" v-if="ref && !isSelecting" @click="doDelete">{{ confirmDelete ? $t('button_delete_confirmed'): $t('button_delete') }}</div>
   <div class="index" v-if="isSelecting">{{ index }}</div>
 </div>
 </template>

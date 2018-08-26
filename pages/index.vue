@@ -1,22 +1,38 @@
+<i18n>
+{
+  "en": {
+    "create_new_cloudmovie": "Create new cloudmovie",
+    "untitled": "Untitled",
+    "edit_button": "Edit"
+  },
+  "tw": {
+    "create_new_cloudmovie": "建立新的 cloudmovie",
+    "untitled": "未命名",
+    "edit_button": "編輯"
+  }
+}
+</i18n>
 <template>
 <div class="page index">
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
+    <nuxt-link :key="en" :to="switchLocalePath('en')">English</nuxt-link>
+    <nuxt-link :key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
   </nav>
   <div class="primary">
     <h1 class="text-align-center">cloudmovie</h1>
     <h2 class="text-align-center">Edit the web. Hit play.</h2>
     <div class="actions text-align-center">
-      <button class="red" @click="createMovie">建立新的 cloudmovie</button>
+      <button class="red" @click="createMovie">{{ $t('create_new_cloudmovie') }}</button>
     </div>
   </div>
   <div class="movies">
     <div class="movie" v-for="movie of movies" :key="movie.id">
       <div class="id">{{ movie.id }}</div>
-      <div class="title">{{ movie.title ? movie.title : '未命名' }}</div>
+      <div class="title">{{ movie.title ? movie.title : $t('untitled') }}</div>
       <div class="actions">
-        <nuxt-link :to="{ name: 'movies-id', params: { id: movie.id } }">
-          <button class="red">編輯</button>
+        <nuxt-link :to="localePath({ name: 'movies-id', params: { id: movie.id } })">
+          <button class="red">{{ $t('edit_button') }}</button>
         </nuxt-link>
       </div>
     </div>
