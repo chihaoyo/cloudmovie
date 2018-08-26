@@ -12,7 +12,7 @@ html, body, input, select {
 }
 a {
   text-decoration: none;
-  color: blue;
+  color: $primary-color;
 }
 *, *:before, *:after {
   box-sizing: border-box;
@@ -78,6 +78,28 @@ button {
     background-color: $primary-color;
   }
 }
+input[type='checkbox'] {
+  appearance: none;
+  cursor: pointer;
+  height: 2rem;
+  width: 2rem;
+  position: relative;
+  transition: all .15s ease;
+  background-color: rgba($secondary-color, 0.65);
+  border: none;
+  border-radius: 50%;
+  @include shadow;
+  @include checkmark(8px, white);
+
+  &:checked {
+    background-color: $primary-color;
+  }
+  &[disabled],
+  &.immutable {
+    box-shadow: none;
+    cursor: default;
+  }
+}
 .flex-grow {
   flex-grow: 1;
 }
@@ -96,6 +118,7 @@ button {
 pre {
   font-family: "SF Mono", monospace;
   font-size: 0.875em;
+  overflow: scroll;
 }
 nav {
   display: flex;

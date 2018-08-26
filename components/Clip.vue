@@ -83,10 +83,12 @@
       <div class="playback"><span v-if="start > 0">{{ $t('play_start', {timeString:  startTimeString}) }}</span><span>{{ $t('play_duration', {timeString: durationTimeString}) }}</span></div>
     </div>
   </div>
-  <div class="actions">
+  <div class="actions" v-if="!isSelecting">
     <button @click="submit">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
   </div>
-  <div class="delete" v-if="ref" @click="doDelete">{{ confirmDelete ? $t('button_delete_confirmed'): $t('button_delete') }}</div>
+  <input type="checkbox" v-else class="toggle-select" v-model="isSelected" @change="$emit('select', clipID)" />
+  <div class="delete" v-if="ref && !isSelecting" @click="doDelete">{{ confirmDelete ? $t('button_delete_confirmed'): $t('button_delete') }}</div>
+  <div class="index" v-if="isSelecting">{{ index }}</div>
 </div>
 </template>
 
@@ -103,7 +105,7 @@ const videoURLSubstrings = [ 'youtube', 'vimeo' ]
 
 export default {
   mixins: [knowsFirebase],
-  props: ['movieID', 'clipID'],
+  props: ['movieID', 'clipID', 'isSelecting'],
   data() {
     let dataObj = {}
     CLIP.propList.forEach(prop => dataObj[prop] = CLIP.props[prop].default)
@@ -112,6 +114,7 @@ export default {
       ref: null,
       clipTypes,
       isEditing: !(this.movieID && this.clipID),
+      isSelected: false,
       confirmDelete: false,
       end: null
     })
@@ -158,10 +161,17 @@ export default {
     this.ref = this.db.collection('movies').doc(this.movieID).collection('timeline').doc(this.clipID)
     this.ref.onSnapshot(snapshot => {
       let data = snapshot.data()
-      CLIP.propList.forEach(prop => this.$set(this, prop, data[prop]))
+      if(data) {
+        CLIP.propList.forEach(prop => this.$set(this, prop, data[prop]))
+      }
     })
   },
   watch: {
+    isSelecting() {
+      if(!this.isSelecting) {
+        this.isSelected = false
+      }
+    },
     url() {
       if(this.url !== '' && this.url !== null && this.url !== undefined && this.name === null) {
         if(videoURLSubstrings.some(substr => this.url.includes(substr))) {
@@ -259,6 +269,7 @@ export default {
           let newClip = {}
           CLIP.propList.forEach(prop => newClip[prop] = this[prop])
           this.$emit('submit', newClip)
+          this.url = this.name = this.duration = null
         }
       } else {
         this.isEditing = !this.isEditing
@@ -339,13 +350,28 @@ export default {
     bottom: 1rem;
     right: 1rem;
   }
+  > .toggle-select {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+  }
   > .delete {
     position: absolute;
     top: 0;
     right: 0;
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: $primary-color;
     font-size: 0.875rem;
     cursor: pointer;
+  }
+  > .index {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.5rem 0.75rem;
+    color: $secondary-color;
+    font-size: 0.875rem;
+    font-weight: bold;
   }
 }
 </style>
