@@ -8,7 +8,14 @@
     "movie_second": "Second",
     "movie_start": "Start At",
     "movie_end": "End At",
-    "movie_background": "Background"
+    "movie_background": "Background",
+    "play_start": "Play from {timeString}",
+    "play_duration": "Duration {timeString}",
+    "button_finish": "Finish",
+    "button_add": "Add",
+    "button_edit": "Edit",
+    "button_delete": "Delete",
+    "button_delete_confirmed": "Delete Confirmed"
   },
   "tw":{
     "movie_type": "類型",
@@ -18,7 +25,14 @@
     "movie_second": "秒數",
     "movie_start": "開始於",
     "movie_end": "結束於",
-    "movie_background": "背景播放"
+    "movie_background": "背景播放",
+    "play_start": "從 {timeString} 開始",
+    "play_duration": "播放長度 {timeString}",
+    "button_finish": "完成",
+    "button_add": "新增",
+    "button_edit": "編輯t",
+    "button_delete": "刪除",
+    "button_delete_confirmed": "確認刪除"
   }
 }
 </i18n>
@@ -66,13 +80,13 @@
     <div class="thumbnail" v-if="thumbnailStyles" :style="thumbnailStyles"></div>
     <div class="summary">
       <div class="name" :class="name ? ['font-weight-bold'] : ['font-size-small', 'break-all']"><a :href="url" target="_blank">{{ name ? name : url }}</a></div>
-      <div class="playback"><span v-if="start > 0">從 {{ startTimeString }} 開始</span><span>播放長度 {{ durationTimeString }}</span></div>
+      <div class="playback"><span v-if="start > 0">{{ $t('play_start', {timeString:  startTimeString}) }}</span><span>{{ $t('play_duration', {timeString: durationTimeString}) }}</span></div>
     </div>
   </div>
   <div class="actions">
-    <button @click="submit">{{ isEditing ? (ref ? '完成' : '新增') : '編輯' }}</button>
+    <button @click="submit">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
   </div>
-  <div class="delete" v-if="ref" @click="doDelete">{{ confirmDelete ? '確認刪除': '刪除' }}</div>
+  <div class="delete" v-if="ref" @click="doDelete">{{ confirmDelete ? $t('button_delete_confirmed'): $t('button_delete') }}</div>
 </div>
 </template>
 
