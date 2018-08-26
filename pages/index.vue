@@ -1,7 +1,7 @@
 <i18n>
 {
   "en": {
-    "create_new_cloudmovie": "Create new cloudmovie",
+    "create_new_cloudmovie": "Create a new cloudmovie",
     "untitled": "Untitled",
     "edit_button": "Edit"
   },
@@ -16,8 +16,10 @@
 <div class="page index">
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
-    <nuxt-link :key="en" :to="switchLocalePath('en')">English</nuxt-link>
-    <nuxt-link :key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
+    <div class="langs">
+      <nuxt-link class="lang" key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
+      <nuxt-link class="lang" key="en" :to="switchLocalePath('en')">English</nuxt-link>
+    </div>
   </nav>
   <div class="primary">
     <h1 class="text-align-center">cloudmovie</h1>

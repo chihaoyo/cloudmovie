@@ -1,16 +1,24 @@
 <i18n>
 {
   "en":{
-    "movie_title": "Movie Title",
-    "play_loop": "Play Loop",
-    "play_once": "Play Once",
-    "stop": "Stop"
+    "movie_title": "Movie title",
+    "play_loop": "Play loop",
+    "play_once": "Play once",
+    "stop": "Stop",
+    "select": "Select",
+    "cancel_Select": "Cancel select",
+    "cut_paste": "Move",
+    "reindex": "Reindex"
   },
   "tw":{
     "movie_title": "文件標題",
     "play_loop": "重覆播放",
     "play_once": "一次播放",
-    "stop": "停止"
+    "stop": "停止",
+    "select": "選取",
+    "cancel_Select": "取消選取",
+    "cut_paste": "移動",
+    "reindex": "重新編排順序"
   }
 }
 </i18n>
@@ -22,6 +30,10 @@
       <div class="title"><text-editor :value.sync="title" :placeholder="$t('movie_title')" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
       <div class="my-title"><text-editor :value.sync="myTitle" placeholder="我的顯示名稱" @input="val => localUpdate('myTitle', val)" class="red" /></div>
     </div>
+    <div class="langs">
+      <nuxt-link class="lang" key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
+      <nuxt-link class="lang" key="en" :to="switchLocalePath('en')">English</nuxt-link>
+    </div>
   </nav>
   <div class="control-panel">
     <clip :movieID="movieID" @submit="newClip => createClips([newClip])"/>
@@ -31,9 +43,9 @@
       <button @click="stop">{{ $t('stop') }}</button>
     </div>
     <div class="actions">
-      <button @click="toggleSelection">{{ isSelecting ? '取消' : '' }}選取</button>
-      <button @click="cutPaste" v-if="selection.length > 0">移動</button>
-      <button @click="reindex">重新標記順序</button>
+      <button @click="toggleSelection">{{ isSelecting ? $t('cancel_select') : $t('select') }}</button>
+      <button @click="cutPaste" v-if="selection.length > 0">{{ $t('move') }}</button>
+      <button @click="reindex">{{ $t('reindex') }}</button>
     </div>
   </div>
   <div>insertAt {{ insertAt }}</div>

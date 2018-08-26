@@ -5,17 +5,19 @@
     "movie_url": "URL",
     "movie_name": "Name",
     "movie_duration": "Duration",
-    "movie_second": "Second",
-    "movie_start": "Start At",
-    "movie_end": "End At",
-    "movie_background": "Background",
-    "play_start": "Play from {timeString}",
+    "movie_second": "Sec.",
+    "movie_start": "Start at",
+    "movie_end": "End at",
+    "movie_background": "Bgp.",
+    "play_start": "Playback starts from {timeString}",
     "play_duration": "Duration {timeString}",
     "button_finish": "Finish",
     "button_add": "Add",
     "button_edit": "Edit",
     "button_delete": "Delete",
-    "button_delete_confirmed": "Delete Confirmed"
+    "button_confirm_delete": "Confirm delete",
+    "clip_type_webpage": "Webpage",
+    "clip_type_video": "Video"
   },
   "tw":{
     "movie_type": "類型",
@@ -30,9 +32,11 @@
     "play_duration": "播放長度 {timeString}",
     "button_finish": "完成",
     "button_add": "新增",
-    "button_edit": "編輯t",
+    "button_edit": "編輯",
     "button_delete": "刪除",
-    "button_delete_confirmed": "確認刪除"
+    "button_confirm_delete": "確認刪除",
+    "clip_type_webpage": "網頁",
+    "clip_type_video": "影片"
   }
 }
 </i18n>
@@ -43,7 +47,7 @@
       <label>{{ $t('movie_type') }}</label>
       <div class="select">
         <select :value.sync="type" @input="e => update('type', e.target.value)">
-          <option v-for="clipType of clipTypes" :key="clipType.value" :value="clipType.value">{{ clipType.label }}</option>
+          <option v-for="clipType of clipTypes" :key="clipType" :value="clipType">{{ $t('clip_type_' + clipType) }}</option>
         </select>
       </div>
     </div>
@@ -80,14 +84,14 @@
     <div class="thumbnail" v-if="thumbnailStyles" :style="thumbnailStyles"></div>
     <div class="summary">
       <div class="name" :class="name ? ['font-weight-bold'] : ['font-size-small', 'break-all']"><a :href="url" target="_blank">{{ name ? name : url }}</a></div>
-      <div class="playback"><span v-if="start > 0">{{ $t('play_start', {timeString:  startTimeString}) }}</span><span>{{ $t('play_duration', {timeString: durationTimeString}) }}</span></div>
+      <div class="playback"><span v-if="start > 0">{{ $t('play_start', {timeString: startTimeString}) }}</span><span>{{ $t('play_duration', {timeString: durationTimeString}) }}</span></div>
     </div>
   </div>
   <div class="actions" v-if="!isSelecting">
     <button @click="submit">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
   </div>
   <input type="checkbox" v-else class="toggle-select" v-model="isSelected" @change="$emit('select', clipID)" />
-  <div class="delete" v-if="ref && !isSelecting" @click="doDelete">{{ confirmDelete ? $t('button_delete_confirmed'): $t('button_delete') }}</div>
+  <div class="delete" v-if="ref && !isSelecting" @click="doDelete">{{ confirmDelete ? $t('button_confirm_delete'): $t('button_delete') }}</div>
   <div class="index" v-if="isSelecting">{{ index }}</div>
 </div>
 </template>
@@ -96,7 +100,7 @@
 import * as regularExpressions from '~/lib/regularExpressions'
 import * as util from '~/lib/util'
 import * as CLIP from '~/lib/clip'
-import { TYPES as clipTypes } from '~/lib/types'
+import * as clipTypes from '~/lib/types'
 import TextEditor from '~/components/TextEditor'
 import knowsFirebase from '~/interfaces/knowsFirebase'
 

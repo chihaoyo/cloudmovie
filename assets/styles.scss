@@ -131,4 +131,15 @@ nav {
     width: $nav-height;
     height: $nav-height;
   }
+  > .langs {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 0.875rem;
+    > .lang {
+      height: $nav-height / 2;
+      line-height: $nav-height / 2;
+      padding: 0 0.25rem;
+    }
+  }
 }
