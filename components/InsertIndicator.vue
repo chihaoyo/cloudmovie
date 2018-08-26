@@ -1,5 +1,5 @@
 <template>
-<div class="insert-indicator">
+<div class="insert-indicator" :class="{ large: self }">
   <div class="author" :style="backgroundColor">{{ author ? author : '匿名者' }}</div>
   <div class="bar" :style="backgroundColor"></div>
 </div>
@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  props: ['author', 'color'],
+  props: ['author', 'color', 'self'],
   computed: {
     backgroundColor() {
       return { backgroundColor: this.color }
@@ -46,6 +46,15 @@ export default {
     width: $width;
     height: $height;
     background-color: rgba($secondary-color, 0.65);
+  }
+
+  &.large {
+    > .author {
+      top: -1.375rem;
+      padding: 0.25rem;
+      font-size: 0.875rem;
+      font-weight: bold;
+    }
   }
 }
 </style>
