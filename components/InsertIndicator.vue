@@ -1,6 +1,6 @@
 <template>
-<div class="insert-indicator" :class="{ large: self }">
-  <div class="author" :style="backgroundColor">{{ author ? author : '匿名者' }}</div>
+<div class="insert-indicator" :class="{ self: self }">
+  <div class="author" :style="backgroundColor">{{ author ? author : (self ? '我' : '匿名者') }}</div>
   <div class="bar" :style="backgroundColor"></div>
 </div>
 </template>
@@ -22,6 +22,7 @@ export default {
 .insert-indicator {
   $width: 0.25rem;
   $height: 3rem;
+  $offset: 1rem;
 
   position: relative;
   height: $height;
@@ -48,12 +49,14 @@ export default {
     background-color: rgba($secondary-color, 0.65);
   }
 
-  &.large {
+  &.self {
     > .author {
-      top: -1.375rem;
-      padding: 0.25rem;
-      font-size: 0.875rem;
+      top: -2.25rem;
       font-weight: bold;
+    }
+    > .bar {
+      top: -$offset;
+      height: $height + $offset;
     }
   }
 }
