@@ -7,3 +7,18 @@ $z-nav: 1000;
 @mixin shadow {
   box-shadow: 0 2px 8px 0 rgba(black, 0.25);
 }
+
+@mixin checkmark($size, $color) {
+  &:before {
+    content: '';
+    display: block;
+    width: $size;
+    height: $size * 1.75;
+    border-bottom: $size * 0.25 $color solid;
+    border-right: $size * 0.25 $color solid;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -65%) rotate(45deg);
+  }
+}
