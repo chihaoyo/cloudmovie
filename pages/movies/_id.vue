@@ -16,7 +16,7 @@
     </div>
     <div class="actions">
       <button @click="toggleSelection">{{ isSelecting ? '取消' : '' }}選取</button>
-      <button @click="move" v-if="selection.length > 0">移動</button>
+      <button @click="cutPaste" v-if="selection.length > 0">移動</button>
       <button @click="reindex">重新標記順序</button>
     </div>
   </div>
@@ -99,7 +99,7 @@ export default {
     if(!this.movieID) {
       return
     }
-    this.ref = this.db.collection('movies').doc(this.movieID)
+    this.ref = this.getMovieRef()
     this.ref.onSnapshot(snapshot => {
       let data = snapshot.data()
       this.title = data.title
@@ -168,8 +168,11 @@ export default {
     this.goOffline()
   },
   methods: {
+    getMovieRef() {
+      return this.db.collection('movies').doc(this.movieID)
+    },
     getClipRef(clipID) {
-      return this.db.collection('movies').doc(this.movieID).collection('timeline').doc(clipID)
+      return this.getMovieRef().collection('timeline').doc(clipID)
     },
     playOnce() {
       this.loop = false;
@@ -230,7 +233,7 @@ export default {
         this.selection.splice(index, 1)
       }
     },
-    move() {
+    cutPaste() {
       if(this.selection.length < 1) {
         return
       }
@@ -240,7 +243,8 @@ export default {
         return clip
       }).filter(clip => clip !== null && clip != undefined)
       clips.sort((a, b) => a.index - b.index)
-      console.log('move() these clips', clips)
+
+      console.log('[page] cut & paste these sorted clips', clips)
 
       // remove clips from timeline
       let batch = this.db.batch()
@@ -249,13 +253,13 @@ export default {
       })
       batch.commit().then(() => {
         // insert clips in order
-        console.log('re-insert' + JSON.stringify(clips))
+        console.log('[page] cut completed')
         this.createClips(clips)
       })
     },
     reindex() {
       this.timeline.forEach((clip, index) => {
-        this.db.collection('movies').doc(this.movieID).collection('timeline').doc(clip.id).update({ index })
+        this.getClipRef(clip.id).update({ index })
       })
     },
     localUpdate(key, val) {
@@ -273,7 +277,7 @@ export default {
       if(Object.keys(this.clipMoveBuffer).length < 1) {
         return Promise.resolve(1)
       }
-      console.log('moveClips', this.clipMoveBuffer)
+      console.log('[page] move these clips by respective offsets', this.clipMoveBuffer)
       let counter = 0;
       let batch = this.db.batch()
       for(let clipID in this.clipMoveBuffer) {
@@ -284,7 +288,7 @@ export default {
           if(offset) {
             let ref = this.getClipRef(clipID)
             if(ref) {
-              console.log('move clip', clipID, 'to', index + offset)
+              console.log('[page] prepare to move clip', clipID, 'to', index + offset)
               batch.update(ref, { index: index + offset })
               counter++
             }
@@ -292,20 +296,20 @@ export default {
         }
       }
       this.clipMoveBuffer = {}
-      console.log('batch move clips', counter)
+      console.log('[page] execute batch move with', counter, 'operations')
       return batch.commit()
     },
     createClips(clips) {
-      console.log('createClips', clips)
+      console.log('[page] create these clips', clips)
       let index = this.insertAt
       // shift all clips after insersion point
       this.queueMoveClips(index, clips.length)
       this.moveClips().then(() => {
-        console.log('moveclipsthen')
+        console.log('[page] move completed')
         clips.forEach(clip => {
           clip.index = index
-          console.log('@', index)
-          this.db.collection('movies').doc(this.movieID).collection('timeline').add(clip)
+          console.log('[page] add clip at', index)
+          this.getMovieRef().collection('timeline').add(clip)
           index = index + 1
         })
       })
