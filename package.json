@@ -16,6 +16,7 @@
     "axios": "^0.18.0",
     "firebase": "^5.2.0",
     "nuxt": "^1.0.0",
+    "nuxt-i18n": "^5.2.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

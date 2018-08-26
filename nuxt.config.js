@@ -14,6 +14,17 @@ module.exports = {
     color: '#FF7171',
     height: '4px'
   },
+  modules: [
+    ['nuxt-i18n', {
+      locales: ['en', 'tw'],
+      defaultLocale: 'tw',
+      vueI18nLoader: true,
+      detectBrowserLanguage: {
+        useCookie: true,
+        cookieKey: 'i18n_redirected'
+      }
+    }]
+  ],
   build: {
     /*
     ** Run ESLint on save
