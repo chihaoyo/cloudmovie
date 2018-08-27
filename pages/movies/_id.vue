@@ -6,8 +6,10 @@
     "play_once": "Play once",
     "stop": "Stop",
     "select": "Select",
-    "cancel_Select": "Cancel select",
+    "cancel_select": "Cancel select",
     "cut_paste": "Move",
+    "remove": "Remove",
+    "confirm_remove": "Confirm remove",
     "reindex": "Reindex"
   },
   "tw":{
@@ -16,8 +18,10 @@
     "play_once": "一次播放",
     "stop": "停止",
     "select": "選取",
-    "cancel_Select": "取消選取",
+    "cancel_select": "取消選取",
     "cut_paste": "移動",
+    "remove": "刪除",
+    "confirm_remove": "確認刪除",
     "reindex": "重新編排順序"
   }
 }
@@ -36,7 +40,7 @@
     </div>
   </nav>
   <div class="control-panel">
-    <clip :movieID="movieID" @submit="newClip => createClips([newClip])"/>
+    <clip :movieID="movieID" @submit="newClip => remoteAddClips([newClip])"/>
     <div class="actions">
       <button @click="playLoop" class="red">{{ $t('play_loop') }}</button>
       <button @click="playOnce" class="red">{{ $t('play_once') }}</button>
@@ -44,8 +48,9 @@
     </div>
     <div class="actions">
       <button @click="toggleSelection">{{ isSelecting ? $t('cancel_select') : $t('select') }}</button>
-      <button @click="cutPaste" v-if="selection.length > 0">{{ $t('move') }}</button>
-      <button @click="reindex">{{ $t('reindex') }}</button>
+      <button @click="uiCutPaste" v-if="selection.length > 0">{{ $t('cut_paste') }}</button>
+      <button @click="uiRemove" v-if="selection.length > 0">{{ confirmRemove ? $t('confirm_remove') : $t('remove') }}</button>
+      <button @click="uiReindex">{{ $t('reindex') }}</button>
     </div>
   </div>
   <div>insertAt {{ insertAt }}</div>
@@ -93,9 +98,11 @@ export default {
         durationExtension: 0 // add extra time to each clip for slow internet connection
       },
       clipMoveBuffer: {},
+      batch: null,
       insertAt: 0,
       isSelecting: false,
       selection: [],
+      confirmRemove: false,
       isPlaying: false,
       playingAt: -1,
       playbackHandle: null,
@@ -136,49 +143,27 @@ export default {
       snapshot.docChanges().forEach(change => {
         let changeType = change.type
         let id = change.doc.id
-        let data = Object.assign({}, change.doc.data(), { id })
+        let data = change.doc.data()
         if(changeType === 'added') {
-          if(this.timeline.length < 1) {
-            this.timeline.push(data)
-          } else {
-            let index = this.timeline.findIndex(clip => clip.index >= data.index)
-            if(index < 0) {
-              this.timeline.push(data)
-            } else {
-              this.timeline.splice(index, 0, data)
-            }
-          }
+          this.localAddClip(id, data)
         } else if(changeType === 'modified') {
-          Object.assign(this.timeline.find(clip => clip.id === id), data)
+          this.localUpdateClip(id, data)
         } else if(changeType === 'removed') {
-          let index = this.timeline.findIndex(clip => clip.id === id)
-          if(index > -1) {
-            if(index + 1 < this.timeline.length) {
-              this.queueMoveClips(index + 1, -1)
-            }
-            this.timeline.splice(index, 1)
-            if(index < this.insertAt) {
-              this.insertAt = this.insertAt - 1
-            }
-          }
+          this.localRemoveClip(id)
         }
       })
-      this.moveClips()
     })
     this.ref.collection('onlineCollaborators').orderBy('insertAt').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
         let changeType = change.type
         let id = change.doc.id
-        let data = Object.assign({}, change.doc.data(), { id })
+        let data = change.doc.data()
         if(changeType === 'added') {
-          this.onlineCollaborators.push(data)
+          this.localAddCollaborator(id, data)
         } else if(changeType === 'modified') {
-          Object.assign(this.onlineCollaborators.find(profile => profile.id === id), data)
+          this.localUpdateCollaborator(id, data)
         } else if(changeType === 'removed') {
-          let index = this.onlineCollaborators.findIndex(profile => profile.id === id)
-          if(index > -1) {
-            this.onlineCollaborators.splice(index, 1)
-          }
+          this.localRemoveCollaborator(id)
         }
       })
     })
@@ -196,11 +181,233 @@ export default {
     this.goOffline()
   },
   methods: {
+    localUpdate(key, val) {
+      this.$set(this, key, util.validate(val))
+    },
     getMovieRef() {
       return this.db.collection('movies').doc(this.movieID)
     },
     getClipRef(clipID) {
       return this.getMovieRef().collection('timeline').doc(clipID)
+    },
+    localAddCollaborator(id, data) {
+      let newCollaborator = Object.assign(data, { id })
+      this.onlineCollaborators.push(newCollaborator)
+    },
+    localUpdateCollaborator(id, data) {
+      Object.assign(this.onlineCollaborators.find(profile => profile.id === id), data)
+    },
+    localRemoveCollaborator(id) {
+      let index = this.onlineCollaborators.findIndex(profile => profile.id === id)
+      if(index > -1) {
+        this.onlineCollaborators.splice(index, 1)
+      }
+    },
+    localAddClip(id, data) {
+      let newClip = Object.assign(data, { id })
+      if(this.timeline.length < 1) {
+        this.timeline.push(newClip)
+      } else {
+        let index = this.timeline.findIndex(clip => clip.index >= data.index)
+        if(index < 0) {
+          this.timeline.push(newClip)
+        } else {
+          this.timeline.splice(index, 0, newClip)
+        }
+      }
+    },
+    localInsertClip(id, data, index) {
+      let newClip = Object.assign(data, { id })
+      this.timeline.splice(index, 0, newClip)
+    },
+    localUpdateClip(id, data) {
+      Object.assign(this.timeline.find(clip => clip.id === id), data)
+      this.timeline.sort((a, b) => a.index - b.index)
+    },
+    localRemoveClip(id) {
+      let removedClip = null
+      let index = this.timeline.findIndex(clip => clip.id === id)
+      if(index > -1) {
+        removedClip = this.timeline.splice(index, 1).pop()
+        if(index < this.insertAt) {
+          this.insertAt = this.insertAt - 1
+        }
+      }
+      return removedClip
+    },
+    toggleSelection() {
+      this.isSelecting = !this.isSelecting
+      this.selection = []
+    },
+    updateSelection(clipID) {
+      let index = this.selection.indexOf(clipID)
+      if(index < 0) {
+        this.selection.push(clipID)
+      } else {
+        this.selection.splice(index, 1)
+      }
+    },
+    sortSelection() {
+      this.selection.sort((a, b) => this.timeline.find(clip => clip.id === a).index - this.timeline.find(clip => clip.id === b).index)
+    },
+    sortSelectionInReverse() {
+      this.selection.sort((a, b) => this.timeline.find(clip => clip.id === b).index - this.timeline.find(clip => clip.id === a).index)
+    },
+    uiCutPaste() {
+      if(this.selection.length < 1) {
+        return
+      }
+      this.batch = this.db.batch()
+
+      let cutClips = []
+      this.sortSelection()
+      this.selection.forEach(clipID => {
+        cutClips.push(this.localRemoveClip(clipID))
+      })
+      cutClips.forEach(clip => {
+        this.localInsertClip(clip.id, clip, this.insertAt)
+        this.insertAt = this.insertAt + 1
+      })
+      this.bufferReindex()
+      this.remoteMoveClips().then(() => {
+        this.batch = null
+      })
+    },
+    uiRemove() {
+      if(this.confirmRemove) {
+        this.remoteRemoveClips().then(() => {
+          this.selection = []
+          this.batch = null
+        })
+      }
+      this.confirmRemove = !this.confirmRemove
+      if(this.confirmRemove) {
+        setTimeout(() => { this.confirmRemove = false }, 4000)
+      }
+    },
+    uiReindex() {
+      this.bufferReindex()
+      this.remoteMoveClips()
+    },
+    bufferReindex() {
+      this.timeline.forEach((clip, count) => {
+        this.bufferMoveClipTo(clip.id, count)
+      })
+    },
+    bufferMoveClipTo(clipID, to) {
+      if(!this.clipMoveBuffer[clipID]) {
+        this.clipMoveBuffer[clipID] = {}
+      }
+      let clip = this.timeline.find(clip => clip.id === clipID)
+      if(clip && clip.index !== to) {
+        this.clipMoveBuffer[clipID].to = to
+      }
+    },
+    bufferMoveClipBy(clipID, by) {
+      if(!this.clipMoveBuffer[clipID]) {
+        this.clipMoveBuffer[clipID] = { by: 0 }
+      }
+      this.clipMoveBuffer[clipID].by = this.clipMoveBuffer[clipID].by + by
+    },
+    bufferMoveRangeOfClipsBy(fromIndex, by) {
+      this.timeline.filter(clip => clip.index >= fromIndex).forEach(clip => {
+        this.bufferMoveClipBy(clip.id, by)
+      })
+    },
+    registerClipMoveBufferToBatch(skipClipIDs = []) {
+      if(!this.batch) {
+        this.batch = this.db.batch()
+      }
+      for(let clipID in this.clipMoveBuffer) {
+        let clip = this.timeline.find(clip => clip.id === clipID)
+        if(clip && !skipClipIDs.includes(clipID)) {
+          let clipBuffer = this.clipMoveBuffer[clipID]
+          if(clipBuffer) {
+            let ref = this.getClipRef(clipID)
+            if(ref) {
+              if(clipBuffer.hasOwnProperty('to')) {
+                this.batch.update(ref, { index: clipBuffer.to })
+              } else if(clipBuffer.hasOwnProperty('by')) {
+                this.batch.update(ref, { index: clip.index + clipBuffer.by })
+              }
+            }
+          }
+        }
+      }
+      this.clipMoveBuffer = {}
+    },
+    remoteRemoveClips() {
+      if(!this.batch) {
+        this.batch = this.db.batch()
+      }
+      this.sortSelection()
+
+      let pendingRemoval = []
+      for(let clipID of this.selection) {
+        let index = this.timeline.find(clip => clip.id === clipID).index
+        this.batch.delete(this.getClipRef(clipID))
+        this.bufferMoveRangeOfClipsBy(index + 1, -1)
+        pendingRemoval.push(clipID)
+      }
+      this.registerClipMoveBufferToBatch(pendingRemoval)
+      return this.batch.commit()
+    },
+    remoteMoveClips() {
+      this.registerClipMoveBufferToBatch()
+      return this.batch.commit()
+    },
+    remoteAddClips(clips) {
+      let index = this.insertAt
+      // shift all clips after insersion point
+      this.bufferMoveRangeOfClipsBy(index, clips.length)
+      this.remoteMoveClips().then(() => {
+        this.batch = null
+        clips.forEach(clip => {
+          clip.index = index
+          this.getMovieRef().collection('timeline').add(clip)
+          index = index + 1
+        })
+      })
+    },
+    timelineClickHandler(e) {
+      let mouseX = e.offsetX
+      let mouseY = e.offsetY
+
+      let clipPositions = []
+      let rows = []
+      let clips = document.getElementsByClassName('timeline')[0].getElementsByClassName('clip')
+      for(let i = 0; i < clips.length; i++) {
+        let clip = clips[i]
+        let left = clip.offsetLeft
+        let top = clip.offsetTop
+        let width = clip.offsetWidth
+        if(!rows.includes(top)) {
+          rows.push(top)
+        }
+        clipPositions.push({ index: i, left, top, width })
+      }
+      let targetRowIndex = null
+      for(let i = 0; i < rows.length; i++) {
+        let lower = rows[i]
+        let upper = i + 1 < rows.length ? rows[i + 1] : document.documentElement.offsetHeight
+        if(mouseY >= lower && mouseY < upper) {
+          targetRowIndex = i
+          break
+        }
+      }
+      let targetClipPositions = clipPositions.filter(pos => pos.top === rows[targetRowIndex])
+      let targetIndex = null
+      for(let i = 0; i < targetClipPositions.length; i++) {
+        if(mouseX < targetClipPositions[i].left + targetClipPositions[i].width / 2) {
+          targetIndex = targetClipPositions[i].index
+          break
+        }
+      }
+      if(targetIndex === null) {
+        // next row first clip OR just 0
+        targetIndex = targetClipPositions.length > 0 ? targetClipPositions[targetClipPositions.length - 1].index + 1 : 0
+      }
+      this.insertAt = targetIndex
     },
     playOnce() {
       this.loop = false;
@@ -249,139 +456,6 @@ export default {
         clearTimeout(this.playbackHandle)
       }
     },
-    toggleSelection() {
-      this.isSelecting = !this.isSelecting
-      this.selection = []
-    },
-    updateSelection(clipID) {
-      let index = this.selection.indexOf(clipID)
-      if(index < 0) {
-        this.selection.push(clipID)
-      } else {
-        this.selection.splice(index, 1)
-      }
-    },
-    cutPaste() {
-      if(this.selection.length < 1) {
-        return
-      }
-      // sort clipIDs by current index
-      let clips = this.selection.map(clipID => {
-        let clip = this.timeline.find(clip => clip.id === clipID)
-        return clip
-      }).filter(clip => clip !== null && clip != undefined)
-      clips.sort((a, b) => a.index - b.index)
-
-      console.log('[page] cut & paste these sorted clips', clips)
-
-      // remove clips from timeline
-      let batch = this.db.batch()
-      clips.forEach(clip => {
-        batch.delete(this.getClipRef(clip.id))
-      })
-      batch.commit().then(() => {
-        // insert clips in order
-        console.log('[page] cut completed')
-        this.createClips(clips)
-      })
-    },
-    reindex() {
-      this.timeline.forEach((clip, index) => {
-        this.getClipRef(clip.id).update({ index })
-      })
-    },
-    localUpdate(key, val) {
-      this.$set(this, key, util.validate(val))
-    },
-    queueMoveClips(fromIndex, offset) {
-      this.timeline.filter(clip => clip.index >= fromIndex).forEach(clip => {
-        if(!this.clipMoveBuffer[clip.id]) {
-          this.clipMoveBuffer[clip.id] = 0
-        }
-        this.clipMoveBuffer[clip.id] = this.clipMoveBuffer[clip.id] + offset
-      })
-    },
-    moveClips() {
-      if(Object.keys(this.clipMoveBuffer).length < 1) {
-        return Promise.resolve(1)
-      }
-      console.log('[page] move these clips by respective offsets', this.clipMoveBuffer)
-      let counter = 0;
-      let batch = this.db.batch()
-      for(let clipID in this.clipMoveBuffer) {
-        let clip = this.timeline.find(clip => clip.id === clipID)
-        if(clip) {
-          let index = clip.index
-          let offset = this.clipMoveBuffer[clipID]
-          if(offset) {
-            let ref = this.getClipRef(clipID)
-            if(ref) {
-              console.log('[page] prepare to move clip', clipID, 'to', index + offset)
-              batch.update(ref, { index: index + offset })
-              counter++
-            }
-          }
-        }
-      }
-      this.clipMoveBuffer = {}
-      console.log('[page] execute batch move with', counter, 'operations')
-      return batch.commit()
-    },
-    createClips(clips) {
-      console.log('[page] create these clips', clips)
-      let index = this.insertAt
-      // shift all clips after insersion point
-      this.queueMoveClips(index, clips.length)
-      this.moveClips().then(() => {
-        console.log('[page] move completed')
-        clips.forEach(clip => {
-          clip.index = index
-          console.log('[page] add clip at', index)
-          this.getMovieRef().collection('timeline').add(clip)
-          index = index + 1
-        })
-      })
-    },
-    timelineClickHandler(e) {
-      let mouseX = e.offsetX
-      let mouseY = e.offsetY
-
-      let clipPositions = []
-      let rows = []
-      let clips = document.getElementsByClassName('timeline')[0].getElementsByClassName('clip')
-      for(let i = 0; i < clips.length; i++) {
-        let clip = clips[i]
-        let left = clip.offsetLeft
-        let top = clip.offsetTop
-        let width = clip.offsetWidth
-        if(!rows.includes(top)) {
-          rows.push(top)
-        }
-        clipPositions.push({ index: i, left, top, width })
-      }
-      let targetRowIndex = null
-      for(let i = 0; i < rows.length; i++) {
-        let lower = rows[i]
-        let upper = i + 1 < rows.length ? rows[i + 1] : document.documentElement.offsetHeight
-        if(mouseY >= lower && mouseY < upper) {
-          targetRowIndex = i
-          break
-        }
-      }
-      let targetClipPositions = clipPositions.filter(pos => pos.top === rows[targetRowIndex])
-      let targetIndex = null
-      for(let i = 0; i < targetClipPositions.length; i++) {
-        if(mouseX < targetClipPositions[i].left + targetClipPositions[i].width / 2) {
-          targetIndex = targetClipPositions[i].index
-          break
-        }
-      }
-      if(targetIndex === null) {
-        // next row first clip OR just 0
-        targetIndex = targetClipPositions.length > 0 ? targetClipPositions[targetClipPositions.length - 1].index + 1 : 0
-      }
-      this.insertAt = targetIndex
-    },
     goOffline(event) {
       let message = 'Leaving?'
       if(this.ref) {
@@ -394,106 +468,6 @@ export default {
         event.returnValue = message
       }
       return message
-    },
-    unitOpInsert(index, log = true) {
-      let id = util.id()
-      this.timeline.splice(index, 0, { id })
-      if(log) {
-        this.history.push({
-          action: ACTIONS.INSERT,
-          id,
-          index,
-          time: util.time()
-        })
-      }
-      return id
-    },
-    unitOpRemove(id, log = true) {
-      let index = this.timeline.findIndex(clip => clip.id === id)
-      if(index > -1) {
-        let before = JSON.stringify(this.timeline[index])
-        this.timeline.splice(index, 1)
-        if(log) {
-          this.history.push({
-            action: ACTIONS.REMOVE,
-            id,
-            index,
-            before,
-            time: util.time()
-          })
-        }
-        return true
-      }
-      return false
-    },
-    unitOpUpdate(id, prop, val, log = true) {
-      let index = this.timeline.findIndex(clip => clip.id === id)
-      if(index > -1) {
-        let item = this.timeline[index]
-        if(item) {
-          let before = item[prop]
-          if(val === undefined) {
-            delete item[prop]
-          } else {
-            this.$set(item, prop, val)
-          }
-          if(log) {
-            this.history.push({
-              action: ACTIONS.UPDATE,
-              id,
-              index,
-              prop,
-              before,
-              after: val,
-              time: util.time()
-            })
-          }
-        }
-        return true
-      }
-      return false
-    },
-    forward(recordCount) {
-      console.log('FORWARD', recordCount)
-      for(let i = 0; i < recordCount; i++) {
-        let record = this.history[i]
-        // console.log('RECORD', JSON.stringify(record))
-
-        if(record.action === ACTIONS.INSERT) {
-          this.timeline.splice(record.index, 0, {})
-        } else if(record.action === ACTIONS.REMOVE) {
-          this.timeline.splice(record.index, 1)
-        } else if(record.action === ACTIONS.UPDATE) {
-          let item = this.timeline[record.index]
-          if(record.after === undefined) {
-            delete item[record.prop]
-          } else {
-            item[record.prop] = record.after
-          }
-        }
-        console.log('TIMELINE', JSON.stringify(this.timeline))
-      }
-    },
-    backward(recordCount) {
-      console.log('BACKWARD', recordCount)
-      for(let i = this.history.length - 1; i > this.history.length - 1 - recordCount; i--) {
-        let record = this.history[i]
-        // console.log('RECORD', JSON.stringify(record))
-
-        if(record.action === ACTIONS.INSERT) {
-          this.timeline.splice(record.index, 1)
-        } else if(record.action === ACTIONS.REMOVE) {
-          this.timeline.splice(record.index, 0, JSON.parse(record.before))
-        } else if(record.action === ACTIONS.UPDATE) {
-          let item = this.timeline[record.index]
-          if(record.before === undefined) {
-            delete item[record.prop]
-          } else {
-            item[record.prop] = record.before
-          }
-        }
-        console.log('TIMELINE', JSON.stringify(this.timeline))
-      }
     }
   },
   components: {
