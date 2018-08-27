@@ -14,8 +14,6 @@
     "button_finish": "Finish",
     "button_add": "Add",
     "button_edit": "Edit",
-    "button_delete": "Delete",
-    "button_confirm_delete": "Confirm delete",
     "clip_type_webpage": "Webpage",
     "clip_type_video": "Video"
   },
@@ -33,8 +31,6 @@
     "button_finish": "完成",
     "button_add": "新增",
     "button_edit": "編輯",
-    "button_delete": "刪除",
-    "button_confirm_delete": "確認刪除",
     "clip_type_webpage": "網頁",
     "clip_type_video": "影片"
   }
@@ -91,7 +87,6 @@
     <button @click="submit">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
   </div>
   <input type="checkbox" v-else class="toggle-select" v-model="isSelected" @change="$emit('select', clipID)" />
-  <div class="delete" v-if="ref && !isSelecting" @click="doDelete">{{ confirmDelete ? $t('button_confirm_delete'): $t('button_delete') }}</div>
   <div class="index" v-if="isSelecting">{{ index }}</div>
 </div>
 </template>
@@ -119,7 +114,6 @@ export default {
       clipTypes,
       isEditing: !(this.movieID && this.clipID),
       isSelected: false,
-      confirmDelete: false,
       end: null
     })
   },
@@ -174,6 +168,8 @@ export default {
     isSelecting() {
       if(!this.isSelecting) {
         this.isSelected = false
+      } else {
+        this.isEditing = false
       }
     },
     url() {
@@ -278,15 +274,6 @@ export default {
       } else {
         this.isEditing = !this.isEditing
       }
-    },
-    doDelete() {
-      if(this.confirmDelete) {
-        this.ref.delete()
-      }
-      this.confirmDelete = !this.confirmDelete
-      if(this.confirmDelete) {
-        setTimeout(() => { this.confirmDelete = false }, 4000)
-      }
     }
   },
   components: {
@@ -358,15 +345,6 @@ export default {
     position: absolute;
     bottom: 0.75rem;
     right: 0.75rem;
-  }
-  > .delete {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 0.5rem 1rem;
-    color: $primary-color;
-    font-size: 0.875rem;
-    cursor: pointer;
   }
   > .index {
     position: absolute;
