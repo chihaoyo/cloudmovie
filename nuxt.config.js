@@ -16,7 +16,16 @@ module.exports = {
   },
   modules: [
     ['nuxt-i18n', {
-      locales: ['en', 'tw'],
+      locales: [
+        {
+          code: 'en',
+          iso: 'en-US'
+        },
+        {
+          code: 'tw',
+          iso: 'zh-TW'
+        }
+      ],
       defaultLocale: 'tw',
       vueI18nLoader: true,
       detectBrowserLanguage: {
