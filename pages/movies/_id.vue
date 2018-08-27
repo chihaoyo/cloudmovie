@@ -221,8 +221,11 @@ export default {
       this.timeline.splice(index, 0, newClip)
     },
     localUpdateClip(id, data) {
-      Object.assign(this.timeline.find(clip => clip.id === id), data)
-      this.timeline.sort((a, b) => a.index - b.index)
+      let clip = this.timeline.find(clip => clip.id === id)
+      if(clip) {
+        Object.assign(clip, data)
+        this.timeline.sort((a, b) => a.index - b.index)
+      }
     },
     localRemoveClip(id) {
       let removedClip = null
@@ -336,10 +339,22 @@ export default {
       }
       this.clipMoveBuffer = {}
     },
+    remoteAddClips(clips) {
+      this.batch = this.db.batch()
+      let index = this.insertAt
+      // shift all clips after insersion point
+      this.bufferMoveRangeOfClipsBy(index, clips.length)
+      this.remoteMoveClips().then(() => {
+        this.batch = null
+        clips.forEach(clip => {
+          clip.index = index
+          this.getMovieRef().collection('timeline').add(clip)
+          index = index + 1
+        })
+      })
+    },
     remoteRemoveClips() {
-      if(!this.batch) {
-        this.batch = this.db.batch()
-      }
+      this.batch = this.db.batch()
       this.sortSelection()
 
       let pendingRemoval = []
@@ -353,21 +368,9 @@ export default {
       return this.batch.commit()
     },
     remoteMoveClips() {
+      // DO NOT reset batch here
       this.registerClipMoveBufferToBatch()
       return this.batch.commit()
-    },
-    remoteAddClips(clips) {
-      let index = this.insertAt
-      // shift all clips after insersion point
-      this.bufferMoveRangeOfClipsBy(index, clips.length)
-      this.remoteMoveClips().then(() => {
-        this.batch = null
-        clips.forEach(clip => {
-          clip.index = index
-          this.getMovieRef().collection('timeline').add(clip)
-          index = index + 1
-        })
-      })
     },
     timelineClickHandler(e) {
       let mouseX = e.offsetX
