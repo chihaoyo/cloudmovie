@@ -2,6 +2,7 @@
 {
   "en":{
     "movie_title": "Movie title",
+    "my_title": "My title",
     "play_loop": "Play loop",
     "play_once": "Play once",
     "stop": "Stop",
@@ -14,6 +15,7 @@
   },
   "tw":{
     "movie_title": "文件標題",
+    "my_title": "我的顯示名稱",
     "play_loop": "重覆播放",
     "play_once": "一次播放",
     "stop": "停止",
@@ -32,7 +34,7 @@
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
       <div class="title"><text-editor :value.sync="title" :placeholder="$t('movie_title')" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
-      <div class="my-title"><text-editor :value.sync="myTitle" placeholder="我的顯示名稱" @input="val => localUpdate('myTitle', val)" class="red" /></div>
+      <div class="my-title"><text-editor :value.sync="myTitle" :placeholder="$t('my_title')" @input="val => localUpdate('myTitle', val)" class="red" /></div>
     </div>
     <div class="langs">
       <nuxt-link class="lang" key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
