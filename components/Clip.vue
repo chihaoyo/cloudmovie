@@ -131,7 +131,7 @@ export default {
     thumbnailStyles() {
       let styles = null
       if(this.youtubeID) {
-        styles = { backgroundImage: `url(http://img.youtube.com/vi/${this.youtubeID}/maxresdefault.jpg)` }
+        styles = { backgroundImage: `url(https://i.ytimg.com/vi/${this.youtubeID}/hqdefault.jpg)` }
       }
       return styles
     },
@@ -182,6 +182,7 @@ export default {
             fetch(`${springboard}get-youtube-meta.php?id=${this.youtubeID}`).then(response => {
               return response.json()
             }).then(json => {
+              console.log(json)
               this.update('name', json.title)
             })
           } else {
@@ -316,7 +317,8 @@ export default {
   }
   > .preview {
     > .thumbnail {
-      background-size: contain;
+      background-size: cover;
+      background-position: center center;
       &:after {
         content: '';
         display: block;
