@@ -182,7 +182,6 @@ export default {
             fetch(`${springboard}get-youtube-meta.php?id=${this.youtubeID}`).then(response => {
               return response.json()
             }).then(json => {
-              console.log(json)
               this.update('name', json.title)
             })
           } else {
