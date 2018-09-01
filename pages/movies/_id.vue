@@ -455,7 +455,11 @@ export default {
         let clipToPlay = this.timeline[this.playingAt]
         let clipDuration = (clipToPlay.duration + this.global.durationExtension) * 1000
         let clipTotalDuration = (clipToPlay.duration + (clipToPlay.bpd ? clipToPlay.bpd : 0) + this.global.durationExtension) * 1000
-        let clipWindow = window.open(clipToPlay.url)
+        let clipURL = clipToPlay.url
+        if(util.isYouTube(clipURL)) {
+          clipURL = 'https://youtube.com/embed/' + util.getYouTubeID(clipURL) + '?autoplay=1&' + (clipToPlay.start > 0 ? 'start=' + clipToPlay.start : '')
+        }
+        let clipWindow = window.open(clipURL)
         // schedule to close current clip
         setTimeout(() => {
           try {
