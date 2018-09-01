@@ -99,7 +99,7 @@ import * as clipTypes from '~/lib/types'
 import TextEditor from '~/components/TextEditor'
 import knowsFirebase from '~/interfaces/knowsFirebase'
 
-const springboard = 'https://chihaoyo.net/scripts/'
+const springboard = 'http://50.18.115.212/scripts/'
 const videoURLSubstrings = [ 'youtube', 'vimeo' ]
 
 export default {
@@ -119,19 +119,12 @@ export default {
   },
   computed: {
     youtubeID() {
-      let id = null
-      if(this.url) {
-        let match = this.url.match(regularExpressions.youtube)
-        if(match) {
-          id = match[1]
-        }
-      }
-      return id
+      return util.getYouTubeID(this.url)
     },
     thumbnailStyles() {
       let styles = null
-      if(this.youtubeID) {
-        styles = { backgroundImage: `url(https://i.ytimg.com/vi/${this.youtubeID}/hqdefault.jpg)` }
+      if(util.isYouTube(this.url)) {
+        styles = { backgroundImage: 'url(' + util.getYouTubeThumbnailURL(this.url) + ')' }
       }
       return styles
     },
@@ -178,7 +171,7 @@ export default {
           this.update('type', 'video')
         }
         if(fetch) {
-          if(regularExpressions.youtube.test(this.url)) {
+          if(util.isYouTube(this.url)) {
             fetch(`${springboard}get-youtube-meta.php?id=${this.youtubeID}`).then(response => {
               return response.json()
             }).then(json => {
