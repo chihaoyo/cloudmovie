@@ -11,7 +11,10 @@
     "cut_paste": "Move",
     "remove": "Remove",
     "confirm_remove": "Confirm remove",
-    "reindex": "Reindex"
+    "reindex": "Reindex",
+    "download": "Download",
+    "show_console": "Show console",
+    "hide_console": "Hide console"
   },
   "tw":{
     "movie_title": "文件標題",
@@ -24,7 +27,10 @@
     "cut_paste": "移動",
     "remove": "刪除",
     "confirm_remove": "確認刪除",
-    "reindex": "重新編排順序"
+    "reindex": "重新編排順序",
+    "download": "下載",
+    "show_console": "顯示除錯訊息",
+    "hide_console": "隱藏除錯訊息"
   }
 }
 </i18n>
@@ -53,9 +59,10 @@
       <button @click="uiCutPaste" v-if="selection.length > 0">{{ $t('cut_paste') }}</button>
       <button @click="uiRemove" v-if="selection.length > 0">{{ confirmRemove ? $t('confirm_remove') : $t('remove') }}</button>
       <button @click="uiReindex">{{ $t('reindex') }}</button>
+      <a class="button" :href="timelineJSON" :download="'cloudmovie-' + movieID + '.json'">{{ $t('download') }}</a>
+      <button @click="showConsole = !showConsole">{{ showConsole ? $t('hide_console') : $t('show_console') }}</button>
     </div>
   </div>
-  <div>insertAt {{ insertAt }}</div>
   <div class="timeline" @click="timelineClickHandler">
     <template v-for="(clip, index) of timeline">
       <insert-indicator v-for="profile of onlineCollaborators.filter(profile => profile.insertAt === index)" v-if="profile.id !== myID" :author="profile.title" :color="profile.color" :key="'insert-indicator-' + profile.id" />
@@ -65,12 +72,15 @@
     <insert-indicator v-for="profile of onlineCollaborators.filter(profile => profile.insertAt >= timeline.length)" v-if="profile.id !== myID" :author="profile.title" :color="profile.color" :key="'insert-indicator-' + profile.id" />
     <insert-indicator :author="myTitle" :color="myColor" :self="true" v-if="insertAt >= timeline.length" />
   </div>
-  <pre>{{ JSON.stringify(timeline, null, 2) }}</pre>
-  <pre>
-    <div class="records">
-      <div class="record" v-for="(record, index) of history" :key="index">{{ record }}</div>
-    </div>
-  </pre>
+  <div class="console" v-if="showConsole">
+    <pre>insertAt {{ insertAt }}</pre>
+    <pre>{{ JSON.stringify(timeline, null, 2) }}</pre>
+    <pre>
+      <div class="records">
+        <div class="record" v-for="(record, index) of history" :key="index">{{ record }}</div>
+      </div>
+    </pre>
+  </div>
 </div>
 </template>
 
@@ -109,11 +119,18 @@ export default {
       playingAt: -1,
       playbackHandle: null,
       loop: false,
+      showConsole: false
     }
   },
   computed: {
     movieID() {
       return this.$route.params.id
+    },
+    timelineJSON() {
+      let movie = {
+        timeline: this.timeline
+      }
+      return 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(movie))
     }
   },
   watch: {
@@ -504,7 +521,8 @@ export default {
   > .control-panel {
     > .actions {
       margin: 1rem;
-      > button:not(:last-child) {
+      > button:not(:last-child),
+      > .button:not(:last-child) {
         margin-right: 0.5rem;
       }
     }
@@ -521,10 +539,12 @@ export default {
       width: 18rem;
     }
   }
-  > pre {
-    background-color: rgba(black, 0.15);
-    padding: 1rem;
-    font-size: 0.75rem;
+  > .console {
+      pre {
+      background-color: rgba(black, 0.15);
+      padding: 1rem;
+      font-size: 0.625rem;
+    }
   }
 }
 </style>
