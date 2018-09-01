@@ -43,7 +43,7 @@ export default {
       opacity: 1;
     }
   }
-  &.red {
+  &.primary {
     > input {
       background: rgba($primary-color, 0.25);
       &:focus {

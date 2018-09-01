@@ -39,8 +39,8 @@
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
-      <div class="title"><text-editor :value.sync="title" :placeholder="$t('movie_title')" @input="val => firebaseSetMovie(movieID, { title: val })" class="red font-weight-bold" /></div>
-      <div class="my-title"><text-editor :value.sync="myTitle" :placeholder="$t('my_title')" @input="val => localUpdate('myTitle', val)" class="red" /></div>
+      <div class="title"><text-editor :value.sync="title" :placeholder="$t('movie_title')" @input="val => firebaseSetMovie(movieID, { title: val })" class="primary font-weight-bold" /></div>
+      <div class="my-title"><text-editor :value.sync="myTitle" :placeholder="$t('my_title')" @input="val => localUpdate('myTitle', val)" class="primary" /></div>
     </div>
     <div class="langs">
       <nuxt-link class="lang" key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
@@ -51,11 +51,11 @@
     <clip :movieID="movieID" @submit="newClip => remoteAddClips([newClip])"/>
     <div class="actions">
       <template v-if="!isPlaying">
-        <button @click="playLoop" class="red">{{ $t('play_loop') }}</button>
-        <button @click="playOnce" class="red">{{ $t('play_once') }}</button>
+        <button @click="playLoop" class="primary">{{ $t('play_loop') }}</button>
+        <button @click="playOnce" class="primary">{{ $t('play_once') }}</button>
       </template>
       <template v-else>
-        <button @click="stop" class="red">{{ $t('stop') }}</button>
+        <button @click="stop" class="primary">{{ $t('stop') }}</button>
       </template>
     </div>
     <div class="actions">
@@ -461,7 +461,7 @@ export default {
         let clipTotalDuration = (clipToPlay.duration + (clipToPlay.bpd ? clipToPlay.bpd : 0) + this.global.durationExtension) * 1000
         let clipURL = clipToPlay.url
         if(util.isYouTube(clipURL)) {
-          clipURL = 'https://youtube.com/embed/' + util.getYouTubeID(clipURL) + '?autoplay=1&' + (clipToPlay.start > 0 ? 'start=' + clipToPlay.start : '')
+          clipURL = 'https://youtube.com/embed/' + util.getYouTubeID(clipURL) + '?showinfo=0&modestbranding=1&controls=0&autoplay=1&' + (clipToPlay.start > 0 ? 'start=' + clipToPlay.start : '')
         }
         let clipWindow = window.open(clipURL)
         // schedule to close current clip

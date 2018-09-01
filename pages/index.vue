@@ -25,7 +25,7 @@
     <h1 class="text-align-center">cloudmovie</h1>
     <h2 class="text-align-center">Edit the web. Hit play.</h2>
     <div class="actions text-align-center">
-      <button class="red" @click="createMovie">{{ $t('create_new_cloudmovie') }}</button>
+      <button class="primary" @click="createMovie">{{ $t('create_new_cloudmovie') }}</button>
     </div>
   </div>
   <div class="movies">
@@ -34,7 +34,7 @@
       <div class="title">{{ movie.title ? movie.title : $t('untitled') }}</div>
       <div class="actions">
         <nuxt-link :to="localePath({ name: 'movies-id', params: { id: movie.id } })">
-          <button class="red">{{ $t('edit_button') }}</button>
+          <button class="primary">{{ $t('edit_button') }}</button>
         </nuxt-link>
       </div>
     </div>
