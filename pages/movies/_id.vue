@@ -50,9 +50,13 @@
   <div class="control-panel">
     <clip :movieID="movieID" @submit="newClip => remoteAddClips([newClip])"/>
     <div class="actions">
-      <button @click="playLoop" class="red">{{ $t('play_loop') }}</button>
-      <button @click="playOnce" class="red">{{ $t('play_once') }}</button>
-      <button @click="stop">{{ $t('stop') }}</button>
+      <template v-if="!isPlaying">
+        <button @click="playLoop" class="red">{{ $t('play_loop') }}</button>
+        <button @click="playOnce" class="red">{{ $t('play_once') }}</button>
+      </template>
+      <template v-else>
+        <button @click="stop" class="red">{{ $t('stop') }}</button>
+      </template>
     </div>
     <div class="actions">
       <button @click="toggleSelection">{{ isSelecting ? $t('cancel_select') : $t('select') }}</button>
