@@ -63,7 +63,7 @@
       <button @click="uiCutPaste" v-if="selection.length > 0">{{ $t('cut_paste') }}</button>
       <button @click="uiRemove" v-if="selection.length > 0">{{ confirmRemove ? $t('confirm_remove') : $t('remove') }}</button>
       <button @click="uiReindex">{{ $t('reindex') }}</button>
-      <a class="button" :href="timelineJSON" :download="'cloudmovie-' + movieID + '.json'">{{ $t('download') }}</a>
+      <a class="button" :href="timelineJSON" :download="timelineJSONFileName">{{ $t('download') }}</a>
       <button @click="showConsole = !showConsole">{{ showConsole ? $t('hide_console') : $t('show_console') }}</button>
     </div>
   </div>
@@ -132,9 +132,13 @@ export default {
     },
     timelineJSON() {
       let movie = {
+        title: this.title,
         timeline: this.timeline
       }
       return 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(movie))
+    },
+    timelineJSONFileName() {
+      return 'cloudmovie-' + this.movieID + '-' + new Date().getTime() + '.json'
     }
   },
   watch: {
@@ -461,7 +465,7 @@ export default {
         let clipTotalDuration = (clipToPlay.duration + (clipToPlay.bpd ? clipToPlay.bpd : 0) + this.global.durationExtension) * 1000
         let clipURL = clipToPlay.url
         if(util.isYouTube(clipURL)) {
-          clipURL = 'https://youtube.com/embed/' + util.getYouTubeID(clipURL) + '?showinfo=0&modestbranding=1&controls=0&autoplay=1&' + (clipToPlay.start > 0 ? 'start=' + clipToPlay.start : '')
+          clipURL = 'https://youtube.com/embed/' + util.getYouTubeID(clipURL) + '?showinfo=0&modestbranding=1&controls=0&autoplay=1&start=' + (clipToPlay.start > 0 ? clipToPlay.start : '0')
         }
         let clipWindow = window.open(clipURL)
         // schedule to close current clip
