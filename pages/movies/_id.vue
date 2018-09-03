@@ -14,7 +14,9 @@
     "reindex": "Reindex",
     "download": "Download",
     "show_console": "Show console",
-    "hide_console": "Hide console"
+    "hide_console": "Hide console",
+    "show_add_clip": "Add clip",
+    "hide_add_clip": "Hide add clip"
   },
   "tw":{
     "movie_title": "文件標題",
@@ -30,7 +32,9 @@
     "reindex": "重新編排順序",
     "download": "下載",
     "show_console": "顯示除錯訊息",
-    "hide_console": "隱藏除錯訊息"
+    "hide_console": "隱藏除錯訊息",
+    "show_add_clip": "新增 clip",
+    "hide_add_clip": "隱藏新增介面"
   }
 }
 </i18n>
@@ -48,9 +52,12 @@
     </div>
   </nav>
   <div class="control-panel">
-    <clip :movieID="movieID" @submit="newClip => remoteAddClips([newClip])"/>
+    <div class="add-clip" v-if="showAddClip">
+      <clip :movieID="movieID" @submit="newClip => remoteAddClips([newClip])"/>
+    </div>
     <div class="actions">
       <template v-if="!isPlaying">
+        <button @click="showAddClip = !showAddClip" :class="{ primary: !showAddClip }">{{ showAddClip ? $t('hide_add_clip') : $t('show_add_clip') }}</button>
         <button @click="playLoop" class="primary">{{ $t('play_loop') }}</button>
         <button @click="playOnce" class="primary">{{ $t('play_once') }}</button>
       </template>
@@ -123,7 +130,8 @@ export default {
       playingAt: -1,
       playbackHandle: null,
       loop: false,
-      showConsole: false
+      showConsole: false,
+      showAddClip: false
     }
   },
   computed: {
@@ -531,11 +539,16 @@ export default {
     }
   }
   > .control-panel {
+    > .add-clip {
+      padding: 0.5rem;
+    }
     > .actions {
-      margin: 1rem;
-      > button:not(:last-child),
-      > .button:not(:last-child) {
-        margin-right: 0.5rem;
+      margin: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      > button, > .button {
+        margin: 0.25rem;
       }
     }
   }
@@ -544,12 +557,9 @@ export default {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    padding: 2rem 0.5rem;
+    padding: 2.5rem 0.5rem 2rem;
     cursor: pointer;
-    > .clip {
-      margin: 0.5rem;
-      width: 18rem;
-    }
+    overflow: hidden;
   }
   > .console {
       pre {

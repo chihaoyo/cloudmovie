@@ -4,6 +4,14 @@ $secondary-color: #555;
 $nav-height: 4rem;
 $z-nav: 1000;
 
+$break-point: 480px;
+
+@mixin above-break-point {
+  @media (min-width: #{$break-point}) {
+    @content;
+  }
+}
+
 @mixin shadow {
   box-shadow: 0 2px 8px 0 rgba(black, 0.25);
 }

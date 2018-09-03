@@ -37,8 +37,14 @@
 }
 </i18n>
 <template>
-<div class="clip" :id="clipID">
+<div class="clip" :id="clipID" :class="{ 'is-editing': isEditing }">
   <div class="props" v-if="isEditing">
+    <div class="prop">
+      <text-editor :value.sync="url" @input="val => update('url', val)" :placeholder="$t('movie_url')" class="flex-grow" />
+    </div>
+    <div class="prop">
+      <text-editor :value.sync="name" @input="val => update('name', val)" :placeholder="$t('movie_name')" class="flex-grow" />
+    </div>
     <div class="prop">
       <label>{{ $t('movie_type') }}</label>
       <div class="select">
@@ -48,29 +54,21 @@
       </div>
     </div>
     <div class="prop">
-      <label>{{ $t('movie_url') }}</label>
-      <text-editor :value.sync="url" @input="val => update('url', val)" :placeholder="$t('movie_url')" class="flex-grow" />
-    </div>
-    <div class="prop">
-      <label>{{ $t('movie_name') }}</label>
-      <text-editor :value.sync="name" @input="val => update('name', val)" :placeholder="$t('movie_name')" class="flex-grow" />
-    </div>
-    <div class="prop">
       <label>{{ $t('movie_duration') }}</label>
       <text-editor :value.sync="duration" @input="val => update('duration', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ durationTimeString }}</span>
     </div>
-    <div class="prop">
+    <div class="prop" v-if="type === 'video'">
       <label>{{ $t('movie_start') }}</label>
       <text-editor :value.sync="start" @input="val => update('start', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ startTimeString }}</span>
     </div>
-    <div class="prop">
+    <div class="prop" v-if="type === 'video'">
       <label>{{ $t('movie_end') }}</label>
       <text-editor v-model="end" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ endTimeString }}</span>
     </div>
-    <div class="prop">
+    <div class="prop" v-if="type === 'video'">
       <label>{{ $t('movie_background') }}</label>
       <text-editor :value.sync="bpd" @input="val => update('bpd', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ bpdTimeString }}</span>
@@ -84,7 +82,7 @@
     </div>
   </div>
   <div class="actions" v-if="!isSelecting">
-    <button @click="submit">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
+    <button @click="submit" :class="{ primary: !ref }">{{ isEditing ? (ref ? $t('button_finish') : $t('button_add')) : $t('button_edit') }}</button>
   </div>
   <input type="checkbox" v-else class="toggle-select" v-model="isSelected" @change="$emit('select', clipID)" />
   <div class="index" v-if="isSelecting">{{ index }}</div>
@@ -280,11 +278,19 @@ export default {
 
 .clip {
   position: relative;
+  margin: 0.5rem;
+  width: 85%;
+  @include above-break-point {
+    width: 12rem;
+    &.is-editing {
+      width: 18rem;
+    }
+  }
   background-color: rgba($secondary-color, 0.15);
   cursor: default;
 
   > .props {
-    padding: 1rem;
+    padding: 0.75rem;
     > .prop {
       display: flex;
       align-items: center;
@@ -302,38 +308,53 @@ export default {
       > .computed {
         flex-shrink: 0;
         margin-left: 0.25rem;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         color: rgba($secondary-color, 0.5);
       }
     }
   }
   > .preview {
+    display: flex;
+    align-items: flex-start;
     > .thumbnail {
-      background-size: cover;
+      flex-shrink: 0;
+      width: 6rem;
+      background-size: 186%;
+      background-repeat: repeat;
       background-position: center center;
       &:after {
         content: '';
         display: block;
         width: 100%;
-        padding-bottom: 56.25%;
+        padding-bottom: 100%;
+      }
+    }
+    @include above-break-point {
+      display: block;
+      > .thumbnail {
+        width: 100%;
+        background-size: 104%;
+        &:after {
+          padding-bottom: 56.25%;
+        }
       }
     }
     > .summary {
-      padding: 1rem;
+      padding: 0.75rem;
       > .name {
         line-height: 1.25;
       }
       > .playback {
         margin: 0.5rem 0;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         color: rgba($secondary-color, 0.5);
       }
     }
   }
   > .actions {
     position: absolute;
-    bottom: 1rem;
-    right: 1rem;
+    bottom: 0.75rem;
+    right: 0.75rem;
   }
   > .toggle-select {
     position: absolute;
@@ -346,7 +367,7 @@ export default {
     right: 0;
     padding: 0.5rem 0.75rem;
     color: $secondary-color;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: bold;
   }
 }
