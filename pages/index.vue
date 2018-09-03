@@ -3,12 +3,12 @@
   "en": {
     "create_new_cloudmovie": "Create a new cloudmovie",
     "untitled": "Untitled",
-    "edit_button": "Edit"
+    "open": "Open"
   },
   "tw": {
     "create_new_cloudmovie": "建立新的 cloudmovie",
     "untitled": "未命名",
-    "edit_button": "編輯"
+    "open": "開啟"
   }
 }
 </i18n>
@@ -34,7 +34,7 @@
       <div class="title">{{ movie.title ? movie.title : $t('untitled') }}</div>
       <div class="actions">
         <nuxt-link :to="localePath({ name: 'movies-id', params: { id: movie.id } })">
-          <button class="primary">{{ $t('edit_button') }}</button>
+          <button class="primary">{{ $t('open') }}</button>
         </nuxt-link>
       </div>
     </div>
