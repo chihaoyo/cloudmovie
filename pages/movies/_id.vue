@@ -472,7 +472,7 @@ export default {
         let clipDuration = (clipToPlay.duration + this.global.durationExtension) * 1000
         let clipTotalDuration = (clipToPlay.duration + (clipToPlay.bpd ? clipToPlay.bpd : 0) + this.global.durationExtension) * 1000
         let clipURL = clipToPlay.url
-        if(util.isYouTube(clipURL)) {
+        if(clipToPlay.type === 'video' && util.isYouTube(clipURL)) {
           clipURL = 'https://youtube.com/embed/' + util.getYouTubeID(clipURL) + '?showinfo=0&modestbranding=1&controls=0&autoplay=1&start=' + (clipToPlay.start > 0 ? clipToPlay.start : '0')
         }
         let clipWindow = window.open(clipURL)

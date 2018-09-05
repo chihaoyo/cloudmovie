@@ -121,7 +121,7 @@ export default {
     },
     thumbnailStyles() {
       let styles = null
-      if(util.isYouTube(this.url)) {
+      if(this.type === 'video' && util.isYouTube(this.url)) {
         styles = { backgroundImage: 'url(' + util.getYouTubeThumbnailURL(this.url) + ')' }
       }
       return styles
@@ -260,7 +260,7 @@ export default {
           let newClip = {}
           CLIP.propList.forEach(prop => newClip[prop] = this[prop])
           this.$emit('submit', newClip)
-          this.url = this.name = this.duration = null
+          this.url = this.name = this.duration = this.start = this.end = this.bpd = null
         }
       } else {
         this.isEditing = !this.isEditing
