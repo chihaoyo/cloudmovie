@@ -44,8 +44,9 @@
 
 <script>
 import knowsFirebase from '~/interfaces/knowsFirebase'
+import knowsVersioning from '~/interfaces/knowsVersioning'
 export default {
-  mixins: [knowsFirebase],
+  mixins: [knowsFirebase, knowsVersioning],
   data() {
     return {
       movies: []

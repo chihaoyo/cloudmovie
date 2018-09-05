@@ -103,9 +103,10 @@ import TextEditor from '~/components/TextEditor'
 import Clip from '~/components/Clip'
 import InsertIndicator from '~/components/InsertIndicator'
 import knowsFirebase from '~/interfaces/knowsFirebase'
+import knowsVersioning from '~/interfaces/knowsVersioning'
 
 export default {
-  mixins: [knowsFirebase],
+  mixins: [knowsFirebase, knowsVersioning],
   data() {
     return {
       ref: null,
