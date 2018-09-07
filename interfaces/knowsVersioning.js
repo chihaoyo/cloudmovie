@@ -11,7 +11,6 @@ export default {
     }
     this.db.collection('latestVersion').doc('detail').onSnapshot(snapshot => {
       let data = snapshot.data()
-      console.log(this.currentVersionNumber, data)
       if(data.hasOwnProperty('versionNumber')) {
         if(!this.currentVersionNumber) {
           this.currentVersionNumber = data.versionNumber
