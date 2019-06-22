@@ -9,7 +9,7 @@
     "movie_start": "Start at",
     "movie_end": "End at",
     "movie_background": "Bgp.",
-    "play_start": "Playback starts from {timeString}",
+    "play_start": "Starts from {timeString}",
     "play_duration": "Duration {timeString}",
     "button_finish": "Finish",
     "button_add": "Add",
@@ -77,8 +77,11 @@
   <div class="preview" v-else>
     <div class="thumbnail" v-if="thumbnailStyles" :style="thumbnailStyles"></div>
     <div class="summary">
-      <div class="name" :class="name ? ['font-weight-bold'] : ['font-size-small', 'break-all']"><a :href="url" target="_blank">{{ name ? name : url }}</a></div>
-      <div class="playback"><span v-if="start > 0">{{ $t('play_start', {timeString: startTimeString}) }}</span><span>{{ $t('play_duration', {timeString: durationTimeString}) }}</span></div>
+      <a class="name" :href="url" target="_blank" :class="name ? ['font-weight-bold'] : ['font-size-small', 'break-all']">{{ name ? name : url }}</a>
+      <div class="playback">
+        <div v-if="start > 0">{{ $t('play_start', {timeString: startTimeString}) }}</div>
+        <div>{{ $t('play_duration', {timeString: durationTimeString}) }}</div>
+      </div>
     </div>
   </div>
   <div class="actions" v-if="!isSelecting">
@@ -342,6 +345,7 @@ export default {
     > .summary {
       padding: 0.75rem;
       > .name {
+        display: block;
         line-height: 1.25;
       }
       > .playback {

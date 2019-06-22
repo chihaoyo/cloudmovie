@@ -29,7 +29,7 @@
     "cut_paste": "移動",
     "remove": "刪除",
     "confirm_remove": "確認刪除",
-    "reindex": "重新編排順序",
+    "reindex": "重新排序",
     "download": "下載",
     "show_console": "顯示除錯訊息",
     "hide_console": "隱藏除錯訊息",
@@ -64,8 +64,6 @@
       <template v-else>
         <button @click="stop" class="primary">{{ $t('stop') }}</button>
       </template>
-    </div>
-    <div class="actions">
       <button @click="toggleSelection">{{ isSelecting ? $t('cancel_select') : $t('select') }}</button>
       <button @click="uiCutPaste" v-if="selection.length > 0">{{ $t('cut_paste') }}</button>
       <button @click="uiRemove" v-if="selection.length > 0">{{ confirmRemove ? $t('confirm_remove') : $t('remove') }}</button>
@@ -540,14 +538,21 @@ export default {
     }
   }
   > .control-panel {
+    padding: 0.5rem;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     > .add-clip {
       padding: 0.5rem;
     }
     > .actions {
-      margin: 0.75rem;
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
+      &:not(:last-child) {
+        margin-bottom: 0.5rem;
+      }
       > button, > .button {
         margin: 0.25rem;
       }
