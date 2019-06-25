@@ -81,8 +81,8 @@
         <button @click="showConsole = !showConsole">{{ showConsole ? $t('hide_console') : $t('show_console') }}</button>
       </template>
       <div class="summary">
-        <div>clip 總數 {{ clipCount }}</div>
-        <div>播放長度總計 {{ totalDurationString }}</div>
+        <div>共 {{ clipCount }} 段 clip</div>
+        <div>總播放長度 {{ totalDurationString }}</div>
       </div>
     </div>
   </div>
