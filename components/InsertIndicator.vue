@@ -36,8 +36,8 @@ export default {
     padding: 0.25rem;
     font-size: 0.75rem;
     line-height: 1;
-    color: rgba(black, 0.95);
-    background-color: rgba($secondary-color, 0.65);
+    color: rgba($primary-text-color, 0.95);
+    background-color: rgba($primary-text-color, 0.65);
     word-break: keep-all;
   }
   > .bar {
@@ -46,7 +46,7 @@ export default {
     left: -$width / 2;
     width: $width;
     height: $height;
-    background-color: rgba($secondary-color, 0.65);
+    background-color: rgba($primary-text-color, 0.65);
   }
 
   &.self {

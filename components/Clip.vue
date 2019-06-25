@@ -40,10 +40,10 @@
 <div class="clip" :id="clipID" :class="{ 'is-editing': isEditing }">
   <div class="props" v-if="isEditing">
     <div class="prop">
-      <text-editor :value.sync="url" @input="val => update('url', val)" :placeholder="$t('movie_url')" class="flex-grow" />
+      <input type="text" v-model="url" @input="update('url')" :placeholder="$t('movie_url')" class="flex-grow" />
     </div>
     <div class="prop">
-      <text-editor :value.sync="name" @input="val => update('name', val)" :placeholder="$t('movie_name')" class="flex-grow" />
+      <input type="text" v-model="name" @input="update('name')" :placeholder="$t('movie_name')" class="flex-grow" />
     </div>
     <div class="prop">
       <label>{{ $t('movie_type') }}</label>
@@ -55,22 +55,22 @@
     </div>
     <div class="prop">
       <label>{{ $t('movie_duration') }}</label>
-      <text-editor :value.sync="duration" @input="val => update('duration', val)" :placeholder="$t('movie_second')" class="number" />
+      <input type="text" v-model="duration" @input="update('duration')" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ durationTimeString }}</span>
     </div>
     <div class="prop" v-if="type === 'video'">
       <label>{{ $t('movie_start') }}</label>
-      <text-editor :value.sync="start" @input="val => update('start', val)" :placeholder="$t('movie_second')" class="number" />
+      <input type="text" v-model="start" @input="val => update('start', val)" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ startTimeString }}</span>
     </div>
     <div class="prop" v-if="type === 'video'">
       <label>{{ $t('movie_end') }}</label>
-      <text-editor v-model="end" :placeholder="$t('movie_second')" class="number" />
+      <input type="text" v-model="end" @input="update('end')" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ endTimeString }}</span>
     </div>
     <div class="prop" v-if="type === 'video'">
       <label>{{ $t('movie_background') }}</label>
-      <text-editor :value.sync="bpd" @input="val => update('bpd', val)" :placeholder="$t('movie_second')" class="number" />
+      <input type="text" v-model="bpd" @input="update('bpd')" :placeholder="$t('movie_second')" class="number" />
       <span class="computed">{{ bpdTimeString }}</span>
     </div>
   </div>
@@ -97,7 +97,6 @@ import * as regularExpressions from '~/lib/regularExpressions'
 import * as util from '~/lib/util'
 import * as CLIP from '~/lib/clip'
 import * as clipTypes from '~/lib/types'
-import TextEditor from '~/components/TextEditor'
 import knowsFirebase from '~/interfaces/knowsFirebase'
 
 const springboard = 'http://50.18.115.212/scripts/'
@@ -241,6 +240,9 @@ export default {
       }
     },
     update(key, val) {
+      if(!val) {
+        val = this[key]
+      }
       if(CLIP.props[key].type === 'int') {
         val = parseInt(val)
       }
@@ -269,9 +271,6 @@ export default {
         this.isEditing = !this.isEditing
       }
     }
-  },
-  components: {
-    TextEditor
   }
 }
 </script>
@@ -289,7 +288,7 @@ export default {
       width: 18rem;
     }
   }
-  background-color: rgba($secondary-color, 0.15);
+  background-color: rgba($secondary-text-color, 0.15);
   cursor: default;
 
   > .props {
@@ -306,13 +305,13 @@ export default {
         flex-shrink: 0;
         font-size: $font-size;
         white-space: nowrap;
-        color: rgba($secondary-color, 0.5);
+        color: $tertiary-text-color;
       }
       > .computed {
         flex-shrink: 0;
         margin-left: 0.25rem;
         font-size: 0.75rem;
-        color: rgba($secondary-color, 0.5);
+        color: $tertiary-text-color;
       }
     }
   }
@@ -351,7 +350,7 @@ export default {
       > .playback {
         margin: 0.5rem 0;
         font-size: 0.75rem;
-        color: rgba($secondary-color, 0.5);
+        color: $tertiary-text-color;
       }
     }
   }
@@ -369,10 +368,11 @@ export default {
     position: absolute;
     top: 0;
     right: 0;
-    padding: 0.5rem 0.75rem;
-    color: $secondary-color;
+    padding: 0.375rem 0.5rem;
+    color: $secondary-text-color;
     font-size: 0.75rem;
     font-weight: bold;
+    background: white;
   }
 }
 </style>

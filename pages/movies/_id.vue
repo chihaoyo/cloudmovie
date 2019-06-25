@@ -43,8 +43,12 @@
   <nav>
     <nuxt-link class="home" :to="{ path: '/' }"></nuxt-link>
     <div class="nav-body">
-      <div class="title"><text-editor :value.sync="title" :placeholder="$t('movie_title')" @input="val => firebaseSetMovie(movieID, { title: val })" class="primary font-weight-bold" /></div>
-      <div class="my-title"><text-editor :value.sync="myTitle" :placeholder="$t('my_title')" @input="val => localUpdate('myTitle', val)" class="primary" /></div>
+      <div class="title">
+        <input type="text" v-model="title" :placeholder="$t('movie_title')" class="primary font-weight-bold" />
+      </div>
+      <div class="my-title">
+        <input type="text" v-model="myTitle" :placeholder="$t('my_title')" class="primary" />
+      </div>
     </div>
     <div class="langs">
       <nuxt-link class="lang" key="tw" :to="switchLocalePath('tw')">中文</nuxt-link>
@@ -56,20 +60,30 @@
       <clip :movieID="movieID" @submit="newClip => remoteAddClips([newClip])"/>
     </div>
     <div class="actions">
-      <template v-if="!isPlaying">
+      <template v-if="!isPlaying && !isSelecting">
         <button @click="showAddClip = !showAddClip" :class="{ primary: !showAddClip }">{{ showAddClip ? $t('hide_add_clip') : $t('show_add_clip') }}</button>
+      </template>
+      <template v-if="!isPlaying && !isSelecting && !showAddClip">
         <button @click="playLoop" class="primary">{{ $t('play_loop') }}</button>
         <button @click="playOnce" class="primary">{{ $t('play_once') }}</button>
       </template>
-      <template v-else>
+      <template v-if="isPlaying && !isSelecting && !showAddClip">
         <button @click="stop" class="primary">{{ $t('stop') }}</button>
       </template>
-      <button @click="toggleSelection">{{ isSelecting ? $t('cancel_select') : $t('select') }}</button>
-      <button @click="uiCutPaste" v-if="selection.length > 0">{{ $t('cut_paste') }}</button>
-      <button @click="uiRemove" v-if="selection.length > 0">{{ confirmRemove ? $t('confirm_remove') : $t('remove') }}</button>
-      <button @click="uiReindex">{{ $t('reindex') }}</button>
-      <a class="button" :href="timelineJSON" :download="timelineJSONFileName">{{ $t('download') }}</a>
-      <button @click="showConsole = !showConsole">{{ showConsole ? $t('hide_console') : $t('show_console') }}</button>
+      <template v-if="!isPlaying && !showAddClip">
+        <button @click="toggleSelection">{{ isSelecting ? $t('cancel_select') : $t('select') }}</button>
+        <button @click="uiCutPaste" v-if="selection.length > 0">{{ $t('cut_paste') }}</button>
+        <button @click="uiRemove" v-if="selection.length > 0">{{ confirmRemove ? $t('confirm_remove') : $t('remove') }}</button>
+        <button @click="uiReindex">{{ $t('reindex') }}</button>
+      </template>
+      <template v-if="!isPlaying && !showAddClip && !isSelecting">
+        <a class="button" :href="timelineJSON" :download="timelineJSONFileName">{{ $t('download') }}</a>
+        <button @click="showConsole = !showConsole">{{ showConsole ? $t('hide_console') : $t('show_console') }}</button>
+      </template>
+      <div class="summary">
+        <div>clip 總數 {{ clipCount }}</div>
+        <div>播放長度總計 {{ totalDurationString }}</div>
+      </div>
     </div>
   </div>
   <div class="timeline" @click="timelineClickHandler">
@@ -97,7 +111,6 @@
 import colors from '~/lib/colors'
 import * as util from '~/lib/util'
 import * as ACTIONS from '~/lib/actions'
-import TextEditor from '~/components/TextEditor'
 import Clip from '~/components/Clip'
 import InsertIndicator from '~/components/InsertIndicator'
 import knowsFirebase from '~/interfaces/knowsFirebase'
@@ -146,11 +159,32 @@ export default {
     },
     timelineJSONFileName() {
       return 'cloudmovie-' + this.movieID + '-' + new Date().getTime() + '.json'
+    },
+    clipCount() {
+      return Array.isArray(this.timeline) ? this.timeline.length : 0
+    },
+    totalDuration() {
+      let seconds = 0
+      if(Array.isArray(this.timeline)) {
+        this.timeline.forEach(item => {
+          seconds = seconds + item.duration
+        })
+      }
+      return seconds
+    },
+    totalDurationString() {
+      return util.timeString(this.totalDuration)
     }
   },
   watch: {
+    title() {
+      if(this.title) {
+        this.firebaseSetMovie(this.movieID, { title: this.title })
+      }
+    },
     myTitle() {
       if(this.myID) {
+        this.localUpdate('myTitle', this.myTitle)
         this.ref.collection('onlineCollaborators').doc(this.myID).update({ title: this.myTitle })
       }
     },
@@ -512,7 +546,6 @@ export default {
     }
   },
   components: {
-    TextEditor,
     Clip,
     InsertIndicator
   }
@@ -555,6 +588,11 @@ export default {
       }
       > button, > .button {
         margin: 0.25rem;
+      }
+      > .summary {
+        margin: 0 0.5rem;
+        font-size: 0.875rem;
+        color: $secondary-text-color;
       }
     }
   }
